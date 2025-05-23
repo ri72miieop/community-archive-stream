@@ -1,0 +1,1 @@
+export const EXTENSION_ID = process.env.NODE_ENV === "development"? "obbppbfflmgkbkgkcdmpnfcbllklpomc" :process.env.PLASMO_PUBLIC_CRX_ID;
