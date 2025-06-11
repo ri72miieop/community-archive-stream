@@ -23,7 +23,7 @@ interface UserTweetsResponse {
   data: {
     user: {
       result: {
-        timeline_v2: {
+        timeline: {
           timeline: {
             instructions: TimelineInstructions;
             metadata: unknown;
@@ -44,7 +44,7 @@ export const UserTweetsInterceptor: Interceptor = (req, res) => {
 
   try {
     const json: UserTweetsResponse = JSON.parse(res.responseText);
-    const instructions = json.data.user.result.timeline_v2.timeline.instructions;
+    const instructions = json.data.user.result.timeline.timeline.instructions;
 
     
     saveDebugDataIfDev('user-tweets', res.responseText);
