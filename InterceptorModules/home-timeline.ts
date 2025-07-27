@@ -28,52 +28,54 @@ export const HomeTimelineInterceptor: Interceptor = (req, res) => {
   try {
     // Save debug data to a file if in development mode
     
-    saveDebugDataIfDev('home-timeline', res.responseText);
+    saveDebugDataIfDev('api_home-timeline', res.responseText);
 
-    const json: HomeTimelineResponse = JSON.parse(res.responseText);
-    const instructions = json.data.home.home_timeline_urt.instructions;
+    //const json: HomeTimelineResponse = JSON.parse(res.responseText);
+    //const instructions = json.data.home.home_timeline_urt.instructions;
+//
+    //const newData: Tweet[] = [];
+//
+    //const timelineAddEntriesInstruction = instructions.find(
+    //  (i) => i.type === 'TimelineAddEntries',
+    //) as TimelineAddEntriesInstruction<TimelineTweet>;
+//
+    //// When loading more tweets in conversation, the "TimelineAddEntries" instruction may not exist.
+    //const timelineAddEntriesInstructionEntries = timelineAddEntriesInstruction?.entries ?? [];
+//
+    //for (const entry of timelineAddEntriesInstructionEntries) {
+    //  // The main tweet.
+    //  if (isTimelineEntryTweet(entry)) {
+    //    const tweet = extractTimelineTweet(entry.content.itemContent);
+    //    if (tweet) {
+    //      newData.push(tweet);
+    //    }
+    //  }
+//
+    //  // The conversation thread.
+    //  if (isTimelineEntryHomeConversationThread(entry)) {
+    //    const tweetsInConversation = entry.content.items.map((i) => {
+    //      if (i.entryId.includes('-tweet-')) {
+    //        return extractTimelineTweet(i.item.itemContent)
+    //      }
+    //    })
+//
+    //    newData.push(...tweetsInConversation.filter((t): t is Tweet => !!t));
+    //  }
+    //}
+//
+//
+//
+    //DevLog("Interceptor.function - HomeTimelineInterceptor: ", newData.length)
+    //
+    //// Dispatch a custom event
+    //for(const tweet of newData) {
+    //  DevLog("Sending intercepted data to IndexDB:", tweet.rest_id)
+    //  window.dispatchEvent(new CustomEvent('dataInterceptedEvent', { detail: {data:tweet, type: "home-timeline", originator_id: tweet.rest_id, item_id: tweet.rest_id }}));
+    //}
 
-    const newData: Tweet[] = [];
-
-    const timelineAddEntriesInstruction = instructions.find(
-      (i) => i.type === 'TimelineAddEntries',
-    ) as TimelineAddEntriesInstruction<TimelineTweet>;
-
-    // When loading more tweets in conversation, the "TimelineAddEntries" instruction may not exist.
-    const timelineAddEntriesInstructionEntries = timelineAddEntriesInstruction?.entries ?? [];
-
-    for (const entry of timelineAddEntriesInstructionEntries) {
-      // The main tweet.
-      if (isTimelineEntryTweet(entry)) {
-        const tweet = extractTimelineTweet(entry.content.itemContent);
-        if (tweet) {
-          newData.push(tweet);
-        }
-      }
-
-      // The conversation thread.
-      if (isTimelineEntryHomeConversationThread(entry)) {
-        const tweetsInConversation = entry.content.items.map((i) => {
-          if (i.entryId.includes('-tweet-')) {
-            return extractTimelineTweet(i.item.itemContent)
-          }
-        })
-
-        newData.push(...tweetsInConversation.filter((t): t is Tweet => !!t));
-      }
-    }
-
-
-
-    DevLog("Interceptor.function - HomeTimelineInterceptor: ", newData.length)
-    
-    // Dispatch a custom event
-    for(const tweet of newData) {
-      DevLog("Sending intercepted data to IndexDB:", tweet.rest_id)
-      window.dispatchEvent(new CustomEvent('dataInterceptedEvent', { detail: {data:tweet, type: "home-timeline", originator_id: tweet.rest_id, item_id: tweet.rest_id }}));
-    }
-    DevLog('TTT HomeTimeline: ', JSON.stringify(newData, null, 2))
-    DevLog(`TTT HomeTimeline: ${newData.length} items received`);
+    window.dispatchEvent(new CustomEvent('dataInterceptedEvent', { detail: {data:res.responseText, type: "api_home-timeline", timestamp: new Date().toISOString() }}));
+    DevLog('TTT HomeTimeline: ', JSON.stringify(res.responseText, null, 2))
+    DevLog(`TTT HomeTimeline: 1 items received`);
   } catch (err) {
     DevLog('TTT HomeTimeline: Failed to parse API response', err)
     //logger.debug(req.method, req.url, res.status, res.responseText);

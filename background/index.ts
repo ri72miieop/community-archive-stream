@@ -1,3 +1,4 @@
+import { supabase } from '~core/supabase'
 import { cleanupOldRecords } from '../utils/IndexDB'
 
 // Run database cleanup on extension startup

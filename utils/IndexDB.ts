@@ -6,7 +6,6 @@ import type { UserID, UserMinimal } from './dbUtils';
 export type TimedObject = {
   timestamp: string;
   type: string;
-  item_id: string;
   originator_id: string;
   data: any
   user_id: string;
@@ -43,7 +42,7 @@ export type UserProfile = {
 }
 
 const indexDB = new Dexie('tes') as Dexie & {
-  data: EntityTable<TimedObjectWithCanSendToCA, 'item_id'>;
+  data: EntityTable<TimedObjectWithCanSendToCA, 'originator_id'>;
   userMentions: EntityTable<TimedUserMention, 'id'>;
   profiles: EntityTable<UserProfile, 'user_id'>;
   moots: EntityTable<UserRelation, 'id'>;
@@ -53,7 +52,7 @@ const indexDB = new Dexie('tes') as Dexie & {
 
 // Schema declaration:
 indexDB.version(1).stores({
-  data: 'item_id, originator_id, timestamp, canSendToCA',
+  data: 'originator_id, timestamp, canSendToCA',
   userMentions: 'id,timestamp',
   profiles: 'user_id, username, updated_at',
   moots: '++id, owner_id, user_id,  updated_at',
@@ -63,7 +62,7 @@ indexDB.version(1).stores({
 })
 
 indexDB.version(2).stores({
-  data: 'item_id, originator_id, timestamp, canSendToCA, added_at',
+  data: 'originator_id, timestamp, canSendToCA, added_at',
   
 }).upgrade(transaction => {
   
@@ -88,7 +87,7 @@ export async function duplicateDataWithOlderTimestamp(itemId: string, weeksOffse
     // Create a new object with modified timestamps
     const duplicatedItem: TimedObjectWithCanSendToCA = {
       ...originalItem,
-      item_id: `${originalItem.item_id}_duplicate_${Date.now()}`, // Create a unique ID
+      originator_id: `${originalItem.originator_id}_duplicate_${Date.now()}`, // Create a unique ID
       timestamp: originalItem.timestamp 
         ? new Date(new Date(originalItem.timestamp).getTime() - (weeksOffset * 7 * 24 * 60 * 60 * 1000)).toISOString()
         : new Date(Date.now() - (weeksOffset * 7 * 24 * 60 * 60 * 1000)).toISOString(),
@@ -129,7 +128,7 @@ export async function duplicateAllDataWithOlderTimestamp(weeksOffset = 1): Promi
       // Create duplicates with modified timestamps
       const duplicates: TimedObjectWithCanSendToCA[] = allRecords.map(record => ({
         ...record,
-        item_id: `${record.item_id}_duplicate_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`, // Ensure unique ID
+        originator_id: `${record.originator_id}_duplicate_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`, // Ensure unique ID
         timestamp: record.timestamp 
           ? new Date(new Date(record.timestamp).getTime() - (weeksOffset * 7 * 24 * 60 * 60 * 1000)).toISOString()
           : new Date(Date.now() - (weeksOffset * 7 * 24 * 60 * 60 * 1000)).toISOString(),
@@ -154,7 +153,7 @@ export async function deleteAllDuplicatedRecords(): Promise<void> {
   try {
     const BATCH_SIZE = 500; 
     let totalDeleted = 0;
-    const totalCount = await indexDB.data.filter(record => record.item_id.includes('_duplicate_')).count();
+    const totalCount = await indexDB.data.filter(record => record.originator_id.includes('_duplicate_')).count();
     
     
     // Process in batches
@@ -163,7 +162,7 @@ export async function deleteAllDuplicatedRecords(): Promise<void> {
       
       while (hasMore) {
         const recordsToDelete = await indexDB.data
-          .filter(record => record.item_id.includes('_duplicate_'))
+          .filter(record => record.originator_id.includes('_duplicate_'))
           .limit(BATCH_SIZE)
           .toArray();
         
@@ -173,7 +172,7 @@ export async function deleteAllDuplicatedRecords(): Promise<void> {
         }
         
         // Extract IDs for deletion
-        const idsToDelete = recordsToDelete.map(record => record.item_id);
+        const idsToDelete = recordsToDelete.map(record => record.originator_id);
         
         // Delete the batch
         await indexDB.data.bulkDelete(idsToDelete);
@@ -225,7 +224,7 @@ export async function cleanupOldRecords(maxRecords = 10000): Promise<number> {
           // Use a compound key to ensure we're deleting the exact record
           await indexDB.data
             .where({
-              item_id: record.item_id,
+              originator_id: record.originator_id,
               timestamp: record.timestamp
             })
             .delete();
