@@ -148,7 +148,7 @@ const InterceptorDashboard = () => {
         setIsLoading(true)
         setError(null)
         
-        const response = await supabase
+        const response = await supabase.schema("tes")
           .rpc("get_user_intercepted_stats", { days_back: DAYS_BACK[period] })
           .select("*")
           .returns<{date: string, type: string, count: number}[]>()
