@@ -29,12 +29,10 @@ async function init() {
         const dataObject = data
 
         const response = await sendToBackground({
-          name: "send-intercepted-data",
+          name: "send-intercepted-data-raw",
           body: {
             data: dataObject,
             type: type,
-            originator_id: event.detail.originator_id,
-            item_id: event.detail.item_id,
             timestamp: dataObject.timestamp,
             userid: userid,
             date_added: new Date().toISOString()

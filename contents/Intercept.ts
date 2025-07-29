@@ -33,14 +33,10 @@ const injectInterceptor = () => {
       window[xhrInterceptorKey] = true
 
       const Interceptors = [
-        LikesInterceptor,
-        BookmarksInterceptor,
-        FollowingInterceptor,
-        FollowersInterceptor,
+        
         HomeTimelineInterceptor,
         TweetDetailInterceptor,
         UserTweetsInterceptor,
-        FavoriteTweetInterceptor,
         SearchTimelineInterceptor
       ]
       if(isDev) {

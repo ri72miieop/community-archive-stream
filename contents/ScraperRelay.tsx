@@ -7,5 +7,5 @@ export const config: PlasmoCSConfig = {
 }
  
 relayMessage({
-  name: "send-intercepted-data"
+  name: "send-intercepted-data-raw"
 })

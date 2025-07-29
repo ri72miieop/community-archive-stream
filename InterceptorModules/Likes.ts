@@ -4,7 +4,7 @@ import type { TimelineInstructions } from "./types";
 import { extractTimelineTweet } from "~utils/twe_utils";
 import { extractDataFromResponse } from "~utils/twe_utils";
 import { db } from "~database";
-import { DevLog, saveDebugDataIfDev } from "~utils/devUtils";
+import { DevLog } from "~utils/devUtils";
 
 export interface LikesResponse {
     data: {
@@ -29,7 +29,6 @@ export interface LikesResponse {
     }
 
     try {
-      saveDebugDataIfDev('likes', res.responseText);  
       const newData = extractDataFromResponse<LikesResponse, Tweet>(
         res,
         (json) => json.data.user.result.timeline_v2.timeline.instructions,
@@ -40,7 +39,7 @@ export interface LikesResponse {
       // Dispatch a custom event
     for(const tweet of newData) {
       DevLog("Sending intercepted data to IndexDB:", tweet.rest_id)
-      window.dispatchEvent(new CustomEvent('dataInterceptedEvent', { detail: {data:tweet, type: "likes", originator_id: tweet.rest_id, item_id: tweet.rest_id }}));
+      window.dispatchEvent(new CustomEvent('dataInterceptedEvent', { detail: {data:tweet, type: "likes", originator_id: tweet.rest_id }}));
     }
       DevLog('TTT Likes: ', JSON.stringify(newData, null, 2))
       

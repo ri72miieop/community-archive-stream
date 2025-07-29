@@ -7,7 +7,7 @@ export const DevLog = (...args: any[]) => {
     typeof arg === 'string' ? arg : JSON.stringify(arg)
   ).join(' ');
 
-  if (process.env.NODE_ENV === "development" || (typeof window !== 'undefined' && (window as any).ENABLE_DEV_LOGS)) {
+  if (process.env.NODE_ENV === "development"|| process.env.NODE_ENV === "production"  || (typeof window !== 'undefined' && (window as any).ENABLE_DEV_LOGS)) {
     // Get stack trace
     const stack = new Error().stack;
     // Convert stack to array of lines, skip first line (Error message)

@@ -233,6 +233,18 @@ import type { ItemContentUnion, Media, TimelineAddEntriesInstruction, TimelineEn
   export function extractTweetUserScreenName(tweet: Tweet): string {
     return tweet.core.user_results.result.legacy.screen_name;
   }
+
+  export function extractTweetUserId(tweet: Tweet): string {
+    return tweet.core.user_results.result.rest_id;
+  }
+
+  export function extractTweetUserIsProtected(tweet: Tweet): boolean {
+    return tweet.core.user_results.result.legacy.protected ?? false;
+  }
+
+  export function extractTweetCreatedAt(tweet: Tweet): string {
+    return tweet.legacy.created_at;
+  }
   
   export function extractTweetMedia(tweet: Tweet): Media[] {
     // Always use the real tweet object for retweeted tweets
