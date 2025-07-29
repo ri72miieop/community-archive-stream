@@ -1,7 +1,7 @@
 import { isTimelineEntryTweet, extractTimelineTweet, isTimelineEntryConversationThread } from "~utils/twe_utils";
 import type { Interceptor } from "./types/General";
 import type { TimelineInstructions, Tweet, TimelineAddEntriesInstruction, TimelineTweet, TimelineAddToModuleInstruction } from "./types";
-import { DevLog, saveDebugDataIfDev } from "~utils/devUtils";
+import { DevLog } from "~utils/devUtils";
 
 
 interface TweetDetailResponse {

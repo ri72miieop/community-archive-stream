@@ -3,7 +3,7 @@ import type { User } from "./types";
 import { extractDataFromResponse, extractTimelineUser } from "~utils/twe_utils";
 import type { Interceptor } from "./types/General";
 import type { TimelineInstructions } from "./types";
-import { DevLog, saveDebugDataIfDev } from "~utils/devUtils";
+import { DevLog } from "~utils/devUtils";
 
 
 interface FollowersResponse {
@@ -29,7 +29,6 @@ export const FollowersInterceptor: Interceptor = (req, res) => {
   }
 
   try {
-    saveDebugDataIfDev('followers', res.responseText);
     const newData = extractDataFromResponse<FollowersResponse, User>(
       res,
       (json) => json.data.user.result.timeline.timeline.instructions,

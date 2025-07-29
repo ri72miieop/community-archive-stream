@@ -1,7 +1,7 @@
 import { extractDataFromResponse, extractTimelineTweet, extractTimelineUser, isTimelineEntryListSearch, isTimelineEntrySearchGrid, isTimelineEntryTweet, isTimelineEntryUser } from "~utils/twe_utils";
 import type { Interceptor } from "./types/General";
 import type { ItemContentUnion, List, TimelineAddEntriesInstruction, TimelineAddToModuleInstruction, TimelineInstructions, TimelineTweet, TimelineTwitterList, Tweet, User } from "./types";
-import { DevLog, saveDebugDataIfDev } from "~utils/devUtils";
+import { DevLog } from "~utils/devUtils";
 
 
 interface SearchTimelineResponse {

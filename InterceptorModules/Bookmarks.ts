@@ -4,7 +4,7 @@ import type { Tweet } from "./types/tweet";
 import type { Interceptor } from "./types/General";
 import type { TimelineInstructions } from "./types";
 import { db } from "~database";
-import { DevLog, saveDebugDataIfDev } from "~utils/devUtils";
+import { DevLog } from "~utils/devUtils";
 
 
 
