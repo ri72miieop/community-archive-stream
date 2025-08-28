@@ -1,16 +1,21 @@
 import type { PlasmoMessaging } from "@plasmohq/messaging"
 
 import { GlobalCachedData } from "~contents/Storage/CachedData"
+import { getUser, type UserMinimal } from "~utils/dbUtils"
 
 import { DevLog, PLASMO_PUBLIC_RECORD_EXPIRY_SECONDS } from "~utils/devUtils"
 import { indexDB, type TimedObject } from "~utils/IndexDB"
 
 const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
   const type = req.body.type
+  const user: UserMinimal = await getUser()
+
   DevLog(
     "Interceptor.background.message - send-intercepted-data-raw: Received intercepted data:",
     req.body
   )
+
+  const userid = user?.id ?? "anon";
 
   DevLog(
     "Interceptor.background.message - send-intercepted-data-raw: Sending intercepted data to IndexDB:",
@@ -23,10 +28,10 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
       req.body.originator_id
     )
     console.log("Interceptor.background.data - send-intercepted-data-raw: Sending intercepted data to IndexDB:", req.body.data)
-    const result = await canProcessInterceptedData(req.body.userid)
+    const result = await canProcessInterceptedData(userid)
     let resObject;
     if (result.success) {
-      const redisResult = await sendDataToRedisAPI({type, data: req.body.data, user_id: req.body.userid, timestamp: req.body.timestamp})
+      const redisResult = await sendDataToRedisAPI({type, data: req.body.data, user_id: userid, timestamp: req.body.timestamp})
       DevLog("Interceptor.background.message - send-intercepted-data-raw: result of sending intercepted data to Redis:", redisResult)
       if(redisResult.success) {
         resObject = { success: true }
@@ -106,7 +111,7 @@ async function sendDataToRedisAPI(interceptedData: {
   const apiPayload = {
       type: interceptedData.type,
       data: interceptedData.data,
-      user_id: interceptedData.user_id ?? 'anon-ext', 
+      user_id: interceptedData.user_id ?? 'anon', 
       ...(interceptedData.timestamp && { timestamp: interceptedData.timestamp }),
   };
   console.log("Interceptor.background.data - send-intercepted-data-raw: Sending intercepted data to firehose:", apiPayload)

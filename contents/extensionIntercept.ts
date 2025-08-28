@@ -1,8 +1,6 @@
 import type { PlasmoCSConfig } from "plasmo"
 
 import { sendToBackground } from "@plasmohq/messaging"
-
-import { getUser, type UserMinimal } from "~utils/dbUtils"
 import { DevLog, isDev } from "~utils/devUtils"
 
 import { GlobalCachedData } from "./Storage/CachedData"
@@ -19,10 +17,7 @@ async function init() {
   window.addEventListener(
     "dataInterceptedEvent",
     async (event: CustomEvent) => {
-      const user: UserMinimal = await getUser()
-      //if(!user) throw new Error("User not found")
-      const userid = user?.id || "anon"
-
+      
       let data = event.detail.data
       let type = event.detail.type
       try {
@@ -34,7 +29,6 @@ async function init() {
             data: dataObject,
             type: type,
             timestamp: dataObject.timestamp,
-            userid: userid,
             date_added: new Date().toISOString()
           }
         })

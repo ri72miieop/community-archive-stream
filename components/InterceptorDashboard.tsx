@@ -720,7 +720,6 @@ const InterceptorDashboard = () => {
                 originator_id: item.originator_id,
                 type: item.type,
                 data: item.data,
-                userid: item.user_id,
                 date_added: item.date_added
               }
             })
