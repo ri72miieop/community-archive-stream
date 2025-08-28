@@ -30,9 +30,3 @@ export const getUser = async () => {
   
   return {id:data.session.user.app_metadata.provider_id,username:data.session.user.app_metadata.user_name};
 }
-export const getSignedInUser = async () => {
-  const {data,error} = await supabase.auth.getSession();
-  if(error) throw error;
-  
-  return {id:data.session.user.app_metadata.provider_id,username:data.session.user.app_metadata.user_name};
-}
