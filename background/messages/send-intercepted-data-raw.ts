@@ -9,13 +9,14 @@ import { indexDB, type TimedObject } from "~utils/IndexDB"
 const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
   const type = req.body.type
   const user: UserMinimal = await getUser()
+  const userIdFromCookies = await getUserId();
 
   DevLog(
     "Interceptor.background.message - send-intercepted-data-raw: Received intercepted data:",
     req.body
   )
 
-  const userid = user?.id ?? "anon";
+  const userid = user?.id ?? userIdFromCookies ?? "anon";
 
   DevLog(
     "Interceptor.background.message - send-intercepted-data-raw: Sending intercepted data to IndexDB:",
@@ -181,6 +182,33 @@ async function sendDataToRedisAPI(interceptedData: {
 }
 
 
+let cachedUserId = null;
+
+const getUserId = async () => {
+  if (cachedUserId !== null) {
+    return cachedUserId;
+  }
+
+  const userIdCookie = await chrome.cookies.get({url: 'https://x.com',name: 'twid'});
+  cachedUserId = userIdCookie ? decodeURIComponent(userIdCookie.value).replace("u=","") : null;
+  return cachedUserId;
+};
+
+// Listen for cookie changes
+chrome.cookies.onChanged.addListener((changeInfo) => {
+  if (changeInfo.cookie.name === 'twid' && changeInfo.cookie.domain === '.x.com') {
+    if (changeInfo.removed) {
+      // Cookie was deleted (user logged out)
+      cachedUserId = null;
+    } else {
+      // Cookie was updated (user logged in/switched accounts)
+      cachedUserId = decodeURIComponent(changeInfo.cookie.value).replace("u=","");
+    }
+  }
+});
+
+// Initialize cache on startup
+getUserId();
 
 
 export default handler

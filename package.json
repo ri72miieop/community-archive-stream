@@ -83,7 +83,8 @@
     "key": "$CRX_KEY",
     "permissions": [
       "storage",
-      "sidePanel"
+      "sidePanel",
+      "cookies"
     ],
     "host_permissions": [
       "https://*.twitter.com/*",
