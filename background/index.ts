@@ -33,3 +33,12 @@ chrome.action.onClicked.addListener(() => {
 console.log(
   "Live now; make now always the most precious time. Now will never come again."
 )
+
+
+chrome.runtime.onInstalled.addListener((details) => {
+  if (details.reason === 'install') {
+    chrome.tabs.create({
+      url: chrome.runtime.getURL('options.html')
+    });
+  }
+});
