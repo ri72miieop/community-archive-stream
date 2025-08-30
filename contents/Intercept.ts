@@ -7,12 +7,13 @@ import { FavoriteTweetInterceptor } from "~InterceptorModules/favoriteTweet"
 import { FollowersInterceptor } from "~InterceptorModules/followers"
 import { FollowingInterceptor } from "~InterceptorModules/following"
 import { HomeTimelineInterceptor } from "~InterceptorModules/home-timeline"
-import { LikesInterceptor } from "~InterceptorModules/Likes"
+import { LikedTweetsInterceptor, LikesInterceptor } from "~InterceptorModules/likedTweets"
 import { TweetDetailInterceptor } from "~InterceptorModules/tweet-detail"
 import { UserTweetsInterceptor } from "~InterceptorModules/user-tweets"
 import { DevLog, isDev} from "~utils/devUtils"
 import { EndpointsInterceptor } from "~InterceptorModules/endpoints"
 import { SearchTimelineInterceptor } from "~InterceptorModules/search-timeline"
+import { ListTweetsInterceptor } from "~InterceptorModules/listTweets"
 
 //inspo: https://github.com/prinsss/twitter-web-exporter/blob/main/src/core/extensions/manager.ts#L59
 export const config: PlasmoCSConfig = {
@@ -33,7 +34,8 @@ const injectInterceptor = () => {
       window[xhrInterceptorKey] = true
 
       const Interceptors = [
-        
+        LikedTweetsInterceptor,
+        ListTweetsInterceptor,
         HomeTimelineInterceptor,
         TweetDetailInterceptor,
         UserTweetsInterceptor,
