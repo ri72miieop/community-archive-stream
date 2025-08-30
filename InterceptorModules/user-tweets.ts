@@ -17,7 +17,7 @@ import {
   isTimelineEntryProfileConversation,
   isTimelineEntryTweet,
 } from '~utils/twe_utils';
-import { DevLog, saveDebugDataIfDev } from '~utils/devUtils';
+import { DevLog, } from '~utils/devUtils';
 
 interface UserTweetsResponse {
   data: {
