@@ -1,0 +1,4 @@
+*.db
+*dist/*
+*build/*
+*node_modules*

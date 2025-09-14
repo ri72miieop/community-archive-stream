@@ -1,0 +1,23 @@
+{
+  "name": "community-archive-native-app",
+  "version": "1.0.0",
+  "description": "Native messaging host for Community Archive Stream extension",
+  "main": "native_app.ts",
+  "scripts": {
+    "start": "bun run native_app.ts",
+    "test": "bun run test_native.ts",
+    "dev": "bun run --watch native_app.ts",
+    "prod:build": "bun build ./native_app.ts --compile --outfile native_app",
+    "prod:deploy": "bun build --compile --minify --sourcemap --bytecode native_app.ts --outfile native_app"
+  },
+  "dependencies": {
+    "@types/node": "^24.3.3"
+  },
+  "devDependencies": {
+    "bun-types": "latest"
+  },
+  "engines": {
+    "bun": ">=1.0.0"
+  },
+  "type": "module"
+}

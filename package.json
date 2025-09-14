@@ -85,7 +85,9 @@
     "permissions": [
       "storage",
       "sidePanel",
-      "cookies"
+      "cookies",
+      "nativeMessaging",
+      "alarms"
     ],
     "host_permissions": [
       "https://*.twitter.com/*",
