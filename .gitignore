@@ -34,3 +34,5 @@ dist/
 
 *.env*
 *.claude*
+
+*node_modules*
