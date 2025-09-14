@@ -5,7 +5,7 @@
 //follow issue https://github.com/PostHog/posthog-js/issues/1464
 import posthog from 'posthog-js/dist/module.no-external'
 
-posthog.init('phc_Kx915GiGlAxeIzwWrQjJES94boCJbSCiBbRDykXI35N',
+posthog.init(process.env.PLASMO_PUBLIC_POSTHOG_API_KEY,
     {
         api_host: 'https://us.i.posthog.com',
         person_profiles: 'identified_only' // or 'always' to create profiles for anonymous users as well
