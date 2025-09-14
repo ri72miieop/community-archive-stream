@@ -26,7 +26,7 @@ export const BookmarksInterceptor: Interceptor = (req, res) => {
   }
 
   try {
-    saveDebugDataIfDev('bookmarks', res.responseText);
+    
     const newData = extractDataFromResponse<BookmarksResponse, Tweet>(
       res,
       (json) => json.data.bookmark_timeline_v2.timeline.instructions,
