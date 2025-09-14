@@ -29,22 +29,9 @@ export const FollowersInterceptor: Interceptor = (req, res) => {
   }
 
   try {
-    const newData = extractDataFromResponse<FollowersResponse, User>(
-      res,
-      (json) => json.data.user.result.timeline.timeline.instructions,
-      (entry) => extractTimelineUser(entry.content.itemContent),
-    );
-
-    // Add captured data to the database.
-    //db.extAddUsers(ext.name, newData);
-    DevLog('TTT Followers: ', newData)
     // Dispatch a custom event
-    for(const user of newData) {
-      DevLog("Sending intercepted data to IndexDB:", user.rest_id)
-      window.dispatchEvent(new CustomEvent('dataInterceptedEvent', { detail: {data:user, type: "followers", originator_id: user.rest_id }}));
-    }
-    DevLog('TTT Followers: ', JSON.stringify(newData, null, 2))
-    DevLog(`TTT Followers: ${newData.length} items received`);
+    window.dispatchEvent(new CustomEvent('dataInterceptedEvent', { detail: {data:res.responseText, type: "followers" }}));
+    
   } catch (err) {
     DevLog('TTT Followers: Failed to parse API response', err)
     //logger.debug(req.method, req.url, res.status, res.responseText);
