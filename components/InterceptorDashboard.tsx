@@ -778,7 +778,6 @@ const InterceptorDashboard = () => {
 
   const renderDataCard = (item: TimedObjectWithCanSendToCA) => {
     const isProcessing = item.reason && processingReasons.has(item.reason)
-    console.log("item", item)
     const mappedData = item.type.includes("notification") ? item.data : TwitterDataMapper.mapAll(item.data)
     const tweet = item.type.includes("notification") ? item.data : mappedData[0].tweet;
     const account = item.type.includes("notification") ? item.originator_id : mappedData[0].account;

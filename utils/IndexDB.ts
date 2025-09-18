@@ -2,6 +2,7 @@ import type { Tweet, User } from '../InterceptorModules/types';
 import type * as Database from '~types/database-explicit-types';
 import Dexie, { type EntityTable, type Transaction } from 'dexie';
 import type { UserID, UserMinimal } from './dbUtils';
+import { DevLog } from './devUtils';
 
 export type TimedObject = {
   timestamp: string;
@@ -140,7 +141,7 @@ export async function duplicateAllDataWithOlderTimestamp(weeksOffset = 1): Promi
       // Bulk add all duplicates
       await indexDB.data.bulkAdd(duplicates);
       
-      console.log(`Successfully duplicated ${duplicates.length} records`);
+      DevLog(`Successfully duplicated ${duplicates.length} records`);
     });
   } catch (error) {
     console.error('Error duplicating all data:', error);
@@ -178,10 +179,10 @@ export async function deleteAllDuplicatedRecords(): Promise<void> {
         await indexDB.data.bulkDelete(idsToDelete);
         
         totalDeleted += idsToDelete.length;
-        console.log(`Deleted batch of ${idsToDelete.length} records. Progress: ${totalDeleted}/${totalCount}`);
+        DevLog(`Deleted batch of ${idsToDelete.length} records. Progress: ${totalDeleted}/${totalCount}`);
       }
       
-      console.log(`Successfully deleted ${totalDeleted} duplicated records in batches`);
+      DevLog(`Successfully deleted ${totalDeleted} duplicated records in batches`);
     });
   } catch (error) {
     console.error('Error deleting duplicated records:', error);

@@ -28,7 +28,7 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
       "Interceptor.background.message - send-intercepted-data-raw: Sending intercepted data to IndexDB:",
       req.body.originator_id
     )
-    console.log("Interceptor.background.data - send-intercepted-data-raw: Sending intercepted data to IndexDB:", req.body.data)
+    DevLog("Interceptor.background.data - send-intercepted-data-raw: Sending intercepted data to IndexDB:", req.body.data)
     const result = await canProcessInterceptedData(userid)
     let resObject;
     if (result.success) {
@@ -115,7 +115,7 @@ async function sendDataToRedisAPI(interceptedData: {
       user_id: interceptedData.user_id ?? 'anon', 
       ...(interceptedData.timestamp && { timestamp: interceptedData.timestamp }),
   };
-  console.log("Interceptor.background.data - send-intercepted-data-raw: Sending intercepted data to firehose:", apiPayload)
+  DevLog("Interceptor.background.data - send-intercepted-data-raw: Sending intercepted data to firehose:", apiPayload)
   
   // Retry mechanism with exponential backoff
   const maxRetries = 5;
