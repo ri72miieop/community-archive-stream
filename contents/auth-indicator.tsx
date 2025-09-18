@@ -112,7 +112,7 @@ const AuthIndicator = () => {
             transform: "translateY(1px)",
             opacity: 0.95
           }}>
-          Sign in to enable archiving
+          Sign in
         </div>
       )}
 

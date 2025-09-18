@@ -1,7 +1,7 @@
 {
   "name": "community-archive-stream",
   "displayName": "Community Archive Stream",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "An extension to stream data to the community archive as you use Twitter.",
   "author": "IaimforGOAT",
   "scripts": {
