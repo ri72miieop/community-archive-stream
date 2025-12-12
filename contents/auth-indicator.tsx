@@ -22,26 +22,66 @@ function useAuthSession(): { isSignedIn: boolean; loading: boolean } {
   useEffect(() => {
     let unsubscribed = false
 
-    async function init() {
+    async function checkSession() {
       try {
-        const { data } = await supabase.auth.getSession()
+        // First, try to refresh the session from storage to ensure we have the latest
+        const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession()
+        
         if (!unsubscribed) {
-          setIsSignedIn(!!data.session)
+          if (refreshError) {
+            // If refresh fails, fall back to getSession
+            const { data, error } = await supabase.auth.getSession()
+            if (error) {
+              console.error("Auth check error:", error)
+              setIsSignedIn(false)
+            } else {
+              setIsSignedIn(!!data.session)
+            }
+          } else {
+            // Refresh succeeded
+            setIsSignedIn(!!refreshData.session)
+          }
+          setLoading(false)
         }
-      } finally {
-        if (!unsubscribed) setLoading(false)
+      } catch (err) {
+        console.error("Session check failed:", err)
+        if (!unsubscribed) {
+          setIsSignedIn(false)
+          setLoading(false)
+        }
       }
     }
 
+    // Listen for auth state changes
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsSignedIn(!!session)
+      if (!unsubscribed) {
+        setIsSignedIn(!!session)
+        setLoading(false)
+      }
     })
 
-    init()
+    // Initial check - force refresh to pick up existing sessions
+    checkSession()
+
+    // Also listen for chrome.storage changes to catch cross-context auth updates
+    const storageListener = (changes: { [key: string]: chrome.storage.StorageChange }, areaName: string) => {
+      if (areaName === "local") {
+        // Check if any Supabase auth keys changed
+        const authKeys = Object.keys(changes).filter(key => 
+          key.includes("supabase") || key.includes("auth")
+        )
+        if (authKeys.length > 0 && !unsubscribed) {
+          checkSession()
+        }
+      }
+    }
+
+    chrome.storage.onChanged.addListener(storageListener)
 
     return () => {
       unsubscribed = true
       sub.subscription?.unsubscribe()
+      chrome.storage.onChanged.removeListener(storageListener)
     }
   }, [])
 
