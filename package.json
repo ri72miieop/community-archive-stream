@@ -1,7 +1,7 @@
 {
   "name": "community-archive-stream",
   "displayName": "Community Archive Stream",
-  "version": "0.0.4",
+  "version": "0.0.3",
   "description": "An extension to stream data to the community archive as you use Twitter.",
   "author": "IaimforGOAT",
   "scripts": {
@@ -91,14 +91,6 @@
       "https://*.twitter.com/*",
       "https://*.x.com/*"
     ],
-    "externally_connectable": {
-      "matches": [
-        "https://community-archive.org/*",
-        "https://www.community-archive.org/*",
-        "http://localhost/*",
-        "http://127.0.0.1/*"
-      ]
-    },
     "web_accessible_resources": [
       {
         "resources": [
