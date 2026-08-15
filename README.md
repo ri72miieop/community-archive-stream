@@ -2,10 +2,7 @@
 
 This repo is for docs, bugs, and suggestions for the Community Archive Stream browser extension, which intercepts some tweets as you view them and adds them to the [Twitter Community Archive](http://community-archive.org/) open database
 
-Install it here:
-
-[TBD]
-
+Install it from the [Chrome Web Store](https://chromewebstore.google.com/detail/community-archive-stream/igclpobjpjlphgllncjcgaookmncegbk).
 
 This is a [Plasmo extension](https://docs.plasmo.com/) project bootstrapped with [`plasmo init`](https://www.npmjs.com/package/plasmo).
 
@@ -26,4 +23,3 @@ Open your browser and load the appropriate development build. For example, if yo
 You can start editing the popup by modifying `popup.tsx`. It should auto-update as you make changes. To add an options page, simply add a `options.tsx` file to the root of the project, with a react component default exported. Likewise to add a content page, add a `content.ts` file to the root of the project, importing some module and do some logic, then reload the extension on your browser.
 
 For further guidance, [visit our Documentation](https://docs.plasmo.com/)
-
