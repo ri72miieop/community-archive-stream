@@ -44,39 +44,3 @@ chrome.runtime.onInstalled.addListener((details) => {
     })
   }
 })
-
-const EXTENSION_STATUS_REQUEST = "community-archive:extension-status"
-const COMMUNITY_ARCHIVE_HOSTS = new Set([
-  "community-archive.org",
-  "www.community-archive.org",
-  "localhost",
-  "127.0.0.1"
-])
-
-// The website uses this narrow, read-only handshake to avoid showing install
-// suggestions to people who already have the extension. No account, browsing,
-// or archive data is exposed.
-chrome.runtime.onMessageExternal.addListener(
-  (message, sender, sendResponse) => {
-    let senderIsCommunityArchive = false
-    try {
-      senderIsCommunityArchive =
-        typeof sender.url === "string" &&
-        COMMUNITY_ARCHIVE_HOSTS.has(new URL(sender.url).hostname)
-    } catch {
-      senderIsCommunityArchive = false
-    }
-
-    if (
-      !senderIsCommunityArchive ||
-      message?.type !== EXTENSION_STATUS_REQUEST
-    ) {
-      return
-    }
-
-    sendResponse({
-      installed: true,
-      version: chrome.runtime.getManifest().version
-    })
-  }
-)
