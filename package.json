@@ -1,7 +1,7 @@
 {
   "name": "community-archive-stream",
   "displayName": "Community Archive Stream",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "An extension to stream data to the community archive as you use Twitter.",
   "author": "IaimforGOAT",
   "scripts": {
@@ -47,6 +47,7 @@
     "chart.js": "^4.5.0",
     "chartjs-adapter-date-fns": "^3.0.0",
     "cmdk": "^1.0.4",
+    "date-fns": "^4.4.0",
     "dayjs": "^1.11.13",
     "dexie": "^4.0.10",
     "dexie-export-import": "^4.1.4",
