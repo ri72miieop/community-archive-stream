@@ -1,54 +1,37 @@
 import type { Tweet, User } from '../InterceptorModules/types';
 import type * as Database from '~types/database-explicit-types';
 import Dexie, { type EntityTable, type Transaction } from 'dexie';
-import type { UserID, UserMinimal } from './dbUtils';
+import type { UserMinimal } from './dbUtils';
 import { DevLog } from './devUtils';
+import {
+  scrubUnverifiedCachedData,
+  type PolicySafeTweetEnvelope,
+} from './firehoseResponse';
 
 export type TimedObject = {
   timestamp: string;
   type: string;
   originator_id: string;
-  data: any
-  user_id: string;
+  data?: PolicySafeTweetEnvelope
+  user_id?: string;
 };
 
 export type TimedObjectWithCanSendToCA = TimedObject & {
   canSendToCA?: boolean;
   reason?: string;
   date_added: string;
-}
-
-export type TimedUserMention = UserID & {
-  timestamp: string;
-}
-
-export type UserRelation = {
-  id?: number;
-  owner_id: string;
-  user_id: string;
-  updated_at: number;
-}
-
-export type UserProfile = {
-  user_id: string;
-  username: string;
-  display_name?: string;
-  avatar_media_url?: string;
-  header_media_url?: string;
-  num_tweets?: number;
-  num_following?: number;
-  num_followers?: number;
-  num_likes?: number;
-  last_updated: number;
+  status?: 'accepted' | 'rejected';
+  error_code?: string;
+  policy_safe?: boolean;
+  policy_format?: string;
+  is_tombstone?: boolean;
+  has_tombstones?: boolean;
+  tombstone_tweet_ids?: string[];
+  tombstone_account_ids?: string[];
 }
 
 const indexDB = new Dexie('tes') as Dexie & {
   data: EntityTable<TimedObjectWithCanSendToCA, 'originator_id'>;
-  userMentions: EntityTable<TimedUserMention, 'id'>;
-  profiles: EntityTable<UserProfile, 'user_id'>;
-  moots: EntityTable<UserRelation, 'id'>;
-  followers: EntityTable<UserRelation, 'id'>;
-  follows: EntityTable<UserRelation, 'id'>;
 };
 
 // Schema declaration:
@@ -72,6 +55,32 @@ indexDB.version(2).stores({
     if (!item.added_at) {
       item.added_at = item.timestamp || new Date('2025-01-01').toISOString();
     }
+  });
+});
+
+// Version 3 fails closed on payloads cached by older extension releases. Only
+// the canonical firehose policy-safe envelope may retain a `data` field.
+indexDB.version(3).stores({
+  data: 'originator_id, timestamp, canSendToCA, added_at',
+}).upgrade(transaction => {
+  return transaction.table('data').toCollection().modify(item => {
+    scrubUnverifiedCachedData(item);
+  });
+});
+
+// Version 4 removes even valid response bodies. IndexedDB has no direct access
+// to PostgreSQL consent, so it retains only stable IDs, status, and tombstone
+// metadata after the firehose has accepted a record.
+indexDB.version(4).stores({
+  data: 'originator_id, timestamp, canSendToCA, added_at',
+  userMentions: null,
+  profiles: null,
+  moots: null,
+  followers: null,
+  follows: null,
+}).upgrade(transaction => {
+  return transaction.table('data').toCollection().modify(item => {
+    scrubUnverifiedCachedData(item);
   });
 });
 

@@ -1,10 +1,12 @@
 import { supabase } from "~core/supabase"
 
 import { cleanupOldRecords } from "../utils/IndexDB"
+import { GlobalCachedData } from "~contents/Storage/CachedData"
 
 // Run database cleanup on extension startup
 async function runDatabaseCleanup() {
   try {
+    await GlobalCachedData.ResetAllCache()
     const deletedRecords = await cleanupOldRecords(7500)
     if (deletedRecords > 0) {
       console.log(

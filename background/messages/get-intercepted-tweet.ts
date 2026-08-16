@@ -1,6 +1,4 @@
 import type { PlasmoMessaging } from "@plasmohq/messaging"
-import { TwitterDataMapper } from "~InterceptorModules/utils/TwitterDataMapper"
-
 
 import { DevLog } from "~utils/devUtils"
 import { indexDB } from "~utils/IndexDB"
@@ -27,10 +25,17 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
 
     const tweetRecord = existingRecords[0]
 
-    const items = TwitterDataMapper.mapAll(tweetRecord.data)
-    const tweet = items[0].tweet
-
-    res.send({ success: true, tweet: tweet, date_added: tweetRecord.date_added, date_sent: tweetRecord.timestamp, reason: tweetRecord.reason, canSendToCA: tweetRecord.canSendToCA})
+    // The content script only needs interception status. Do not send cached
+    // tweet content back across the extension messaging boundary.
+    res.send({
+      success: true,
+      date_added: tweetRecord.date_added,
+      date_sent: tweetRecord.timestamp,
+      reason: tweetRecord.reason,
+      canSendToCA: tweetRecord.canSendToCA,
+      is_tombstone: tweetRecord.is_tombstone === true,
+      policy_format: tweetRecord.policy_format
+    })
   } catch (error) {
 
     DevLog(`Interceptor.background.message.${req.body.originator_id} - Error getting tweet ${tweet_id}: ${error.message}`, "error")

@@ -45,14 +45,3 @@ export const isDev = process.env.NODE_ENV === "development"
 export const PLASMO_PUBLIC_CRX_ID = process.env.PLASMO_PUBLIC_CRX_ID
 
 export const PLASMO_PUBLIC_RECORD_EXPIRY_SECONDS = Number.parseInt(process.env.PLASMO_PUBLIC_RECORD_EXPIRY_SECONDS || "600")
-
-export const saveDebugDataIfDev = (prefix: string, responseText: string) => {
-    if (isDev) {
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      DevLog(`TTT.${prefix}.debugfile: Saving debug data to ${prefix}-${timestamp}.json, res: ${responseText}`);
-      const rawJson = responseText;
-      const filename = `${prefix}-${timestamp}.json`;
-      //temporary disable sending to storage
-      //window.dispatchEvent(new CustomEvent('send-to-storage', { detail: { filename: filename, rawJson: rawJson }}));
-    }
-  };

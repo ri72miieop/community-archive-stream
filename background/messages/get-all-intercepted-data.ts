@@ -2,6 +2,7 @@ import type { PlasmoMessaging } from "@plasmohq/messaging"
 
 import { DevLog } from "~utils/devUtils"
 import { indexDB } from "~utils/IndexDB"
+import { projectPersistableMetadata } from "~utils/firehoseResponse"
 
 const REPROCESSABLE_REASONS = [
   "Error processing tweet.",
@@ -33,7 +34,9 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
     }
     
     // Get all filtered data for statistics (before pagination)
-    const filteredData = (await query.sortBy("added_at")).toReversed()
+    const filteredData = (await query.sortBy("added_at"))
+      .toReversed()
+      .map((item) => projectPersistableMetadata(item as Record<string, unknown>))
     const totalCount = filteredData.length
     // Apply pagination
     const paginatedData = filteredData.slice((page - 1) * pageSize, page * pageSize);

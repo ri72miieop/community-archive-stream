@@ -1,9 +1,6 @@
 import { isTimelineEntryTweet, extractTimelineTweet, isTimelineEntryConversationThread } from "~utils/twe_utils";
 import type { Interceptor } from "./types/General";
 import type { TimelineInstructions, Tweet, TimelineAddEntriesInstruction, TimelineTweet, TimelineAddToModuleInstruction } from "./types";
-import { DevLog } from "~utils/devUtils";
-
-
 interface TweetDetailResponse {
   data: {
     threaded_conversation_with_injections_v2: {
@@ -22,7 +19,6 @@ export const TweetDetailInterceptor: Interceptor = (req, res) => {
     
 
     const eventObject = { detail: {data:res.responseText, type: "api_tweet-detail", timestamp: new Date().toISOString() }}
-    DevLog("Sending intercepted data to IndexDB:", eventObject)
     window.dispatchEvent(new CustomEvent('dataInterceptedEvent', eventObject));
 
 

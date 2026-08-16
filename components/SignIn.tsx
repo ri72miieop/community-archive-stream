@@ -162,7 +162,6 @@ const SignIn = () => {
     try {
       setLoading(true);
       await GlobalCachedData.ResetAllCache();
-      await indexDB.userMentions.clear();
       await indexDB.data.clear();
       alert("Cache reset successful!");
     } catch (error) {

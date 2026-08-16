@@ -1,9 +1,7 @@
 import { extractDataFromResponse, extractTimelineTweet, isTimelineEntryConversationThread, isTimelineEntryHomeConversationThread, isTimelineEntryTweet } from "~utils/twe_utils";
 import type { Interceptor } from "./types/General";
 import type { TimelineAddEntriesInstruction, TimelineInstructions, TimelineTweet, Tweet } from "./types";
-import { DevLog, isDev } from "~utils/devUtils";
-
-import { supabase } from "~core/supabase";
+import { DevLog } from "~utils/devUtils";
 
 
 interface HomeTimelineResponse {
@@ -28,7 +26,6 @@ export const HomeTimelineInterceptor: Interceptor = (req, res) => {
   try {
 
     window.dispatchEvent(new CustomEvent('dataInterceptedEvent', { detail: {data:res.responseText, type: "api_home-timeline", timestamp: new Date().toISOString() }}));
-    DevLog('TTT HomeTimeline: ', JSON.stringify(res.responseText, null, 2))
     DevLog(`TTT HomeTimeline: 1 items received`);
   } catch (err) {
     DevLog('TTT HomeTimeline: Failed to parse API response', err)

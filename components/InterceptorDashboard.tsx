@@ -778,11 +778,24 @@ const InterceptorDashboard = () => {
 
   const renderDataCard = (item: TimedObjectWithCanSendToCA) => {
     const isProcessing = item.reason && processingReasons.has(item.reason)
-    const mappedData = item.type.includes("notification") ? item.data : TwitterDataMapper.mapAll(item.data)
-    const tweet = item.type.includes("notification") ? item.data : mappedData[0].tweet;
-    const account = item.type.includes("notification") ? item.originator_id : mappedData[0].account;
+    const rootTweet = item.data?.tweets.find((tweet) =>
+      tweet.rest_id === item.data?.root_tweet_id
+    )
+    let tweet: any
+    let account: any
+    let tweetText = ""
 
-    const tweetText = item.type.includes("notification") ? item.data : mappedData[0].tweet.full_text;
+    if (rootTweet && !item.is_tombstone) {
+      try {
+        const mappedData = TwitterDataMapper.mapAll(rootTweet as any)
+        tweet = mappedData[0]?.tweet
+        account = mappedData[0]?.account
+        tweetText = tweet?.full_text || ""
+      } catch {
+        // Status metadata remains useful even if a future safe envelope has a
+        // display shape this older dashboard cannot map.
+      }
+    }
     
     return (
       <div
@@ -802,7 +815,7 @@ const InterceptorDashboard = () => {
           <p className="text-sm">
             <span className="font-medium">Tweet ID:</span> <a href={`https://twitter.com/${account?.username || "u"}/status/${item.originator_id}`} target="_blank" rel="noopener noreferrer">{item.originator_id}</a>
           </p>
-          {tweet && (
+          {tweet && tweetText && (
             <p className="text-sm">
               <span className="font-medium">Tweet:</span> {tweetText.length > 80 ? `${tweetText.substring(0, 80)}...` : tweetText}
             </p>
