@@ -2,21 +2,20 @@
 import Dexie, { type KeyPaths } from "dexie";
 import { ExtensionType } from "~InterceptorModules/types/General";
 import type { Tweet, Capture, User } from "~InterceptorModules/types";
-import { extractTweetMedia } from "~utils/twe_utils";
 import packageJson from '@/package.json';
 import { DevLog } from "~utils/devUtils";
-import { exportDB, importInto } from 'dexie-export-import';
-import { parseTwitterDateTime } from "~utils/common";
+import { exportDB } from 'dexie-export-import';
 
-const DB_NAME = packageJson.name;
-const DB_VERSION = 1;
+export const CONTENT_DATABASE_NAME = packageJson.name;
+export const CONTENT_DATABASE_VERSION = 2;
 
 export class DatabaseManager {
   private db: Dexie;
+  private openPromise: Promise<void> | null = null;
 
-  constructor() {
-    this.db = new Dexie(DB_NAME);
-    this.init();
+  constructor(databaseName = CONTENT_DATABASE_NAME) {
+    this.db = new Dexie(databaseName);
+    this.configureSchema();
   }
 
   /*
@@ -24,14 +23,6 @@ export class DatabaseManager {
   | Type-Safe Table Accessors
   |--------------------------------------------------------------------------
   */
-
-  private tweets() {
-    return this.db.table<Tweet>('tweets');
-  }
-
-  private users() {
-    return this.db.table<User>('users');
-  }
 
   private captures() {
     return this.db.table<Capture>('captures');
@@ -52,31 +43,13 @@ export class DatabaseManager {
   }
 
   async extGetCapturedTweets(extName: string) {
-    const captures = await this.extGetCaptures(extName);
-    if (!captures) {
-      return [];
-    }
-    const tweetIds = captures.map((capture) => capture.data_key);
-    return this.tweets()
-      .where('rest_id')
-      .anyOf(tweetIds)
-      .filter((t) => this.filterEmptyData(t))
-      .toArray()
-      .catch(this.logError);
+    void extName;
+    return [];
   }
 
   async extGetCapturedUsers(extName: string) {
-    const captures = await this.extGetCaptures(extName);
-    if (!captures) {
-      return [];
-    }
-    const userIds = captures.map((capture) => capture.data_key);
-    return this.users()
-      .where('rest_id')
-      .anyOf(userIds)
-      .filter((t) => this.filterEmptyData(t))
-      .toArray()
-      .catch(this.logError);
+    void extName;
+    return [];
   }
 
   /*
@@ -86,7 +59,6 @@ export class DatabaseManager {
   */
 
   async extAddTweets(extName: string, tweets: Tweet[]) {
-    await this.upsertTweets(tweets);
     await this.upsertCaptures(
       tweets.map((tweet) => ({
         id: `${extName}-${tweet.rest_id}`,
@@ -99,7 +71,6 @@ export class DatabaseManager {
   }
 
   async extAddUsers(extName: string, users: User[]) {
-    await this.upsertUsers(users);
     await this.upsertCaptures(
       users.map((user) => ({
         id: `${extName}-${user.rest_id}`,
@@ -136,21 +107,20 @@ export class DatabaseManager {
   }
 
   async import(data: Blob) {
-    return importInto(this.db, data).catch(this.logError);
+    void data;
+    throw new Error('Legacy content-bearing database imports are disabled');
   }
 
   async clear() {
     await this.deleteAllCaptures();
-    await this.deleteAllTweets();
-    await this.deleteAllUsers();
     DevLog('Database cleared',"info");
   }
 
   async count() {
     try {
       return {
-        tweets: await this.tweets().count(),
-        users: await this.users().count(),
+        tweets: 0,
+        users: 0,
         captures: await this.captures().count(),
       };
     } catch (error) {
@@ -166,36 +136,13 @@ export class DatabaseManager {
   */
 
   async upsertTweets(tweets: Tweet[]) {
-    return this.db
-      .transaction('rw', this.tweets(), () => {
-        const data: Tweet[] = tweets.map((tweet) => ({
-          ...tweet,
-          twe_private_fields: {
-            created_at: +parseTwitterDateTime(tweet.legacy.created_at),
-            updated_at: Date.now(),
-            media_count: extractTweetMedia(tweet).length,
-          },
-        }));
-
-        return this.tweets().bulkPut(data);
-      })
-      .catch(this.logError);
+    void tweets;
+    throw new Error('Content-bearing tweet cache is disabled');
   }
 
   async upsertUsers(users: User[]) {
-    return this.db
-      .transaction('rw', this.users(), () => {
-        const data: User[] = users.map((user) => ({
-          ...user,
-          twe_private_fields: {
-            created_at: +parseTwitterDateTime(user.legacy.created_at),
-            updated_at: Date.now(),
-          },
-        }));
-
-        return this.users().bulkPut(data);
-      })
-      .catch(this.logError);
+    void users;
+    throw new Error('Content-bearing user cache is disabled');
   }
 
   async upsertCaptures(captures: Capture[]) {
@@ -207,23 +154,15 @@ export class DatabaseManager {
   }
 
   async deleteAllTweets() {
-    return this.tweets().clear().catch(this.logError);
+    return;
   }
 
   async deleteAllUsers() {
-    return this.users().clear().catch(this.logError);
+    return;
   }
 
   async deleteAllCaptures() {
     return this.captures().clear().catch(this.logError);
-  }
-
-  private filterEmptyData(data: Tweet | User) {
-    if (!data?.legacy) {
-      DevLog('Empty data found in DB', data, "warn");
-      return false;
-    }
-    return true;
   }
 
   /*
@@ -232,63 +171,47 @@ export class DatabaseManager {
   |--------------------------------------------------------------------------
   */
 
-  async init() {
-    // Indexes for the "tweets" table.
-    const tweetIndexPaths: KeyPaths<Tweet>[] = [
-      'rest_id',
-      'twe_private_fields.created_at',
-      'twe_private_fields.updated_at',
-      'twe_private_fields.media_count',
-      'core.user_results.result.legacy.screen_name',
-      'legacy.favorite_count',
-      'legacy.retweet_count',
-      'legacy.bookmark_count',
-      'legacy.quote_count',
-      'legacy.reply_count',
-      'views.count',
-      'legacy.favorited',
-      'legacy.retweeted',
-      'legacy.bookmarked',
-    ];
-
-    // Indexes for the "users" table.
-    const userIndexPaths: KeyPaths<User>[] = [
-      'rest_id',
-      'twe_private_fields.created_at',
-      'twe_private_fields.updated_at',
-      'legacy.screen_name',
-      'legacy.followers_count',
-      'legacy.statuses_count',
-      'legacy.favourites_count',
-      'legacy.listed_count',
-      'legacy.verified_type',
-      'is_blue_verified',
-      'legacy.following',
-      'legacy.followed_by',
-    ];
-
+  private configureSchema() {
     // Indexes for the "captures" table.
     const captureIndexPaths: KeyPaths<Capture>[] = ['id', 'extension', 'type', 'created_at'];
 
     // Take care of database schemas and versioning.
     // See: https://dexie.org/docs/Tutorial/Design#database-versioning
-    try {
-      this.db
-        .version(DB_VERSION)
-        .stores({
-          tweets: tweetIndexPaths.join(','),
-          users: userIndexPaths.join(','),
-          captures: captureIndexPaths.join(','),
-        })
-        .upgrade(async () => {
-          DevLog('Database upgraded', "info");
-        });
+    this.db
+      .version(CONTENT_DATABASE_VERSION)
+      .stores({
+        tweets: null,
+        users: null,
+        captures: captureIndexPaths.join(','),
+      })
+      .upgrade(async () => {
+        DevLog('Database upgraded', "info");
+      });
+  }
 
-      await this.db.open();
-      DevLog('Database connected', "info");
-    } catch (error) {
-      this.logError(error);
+  async ready(): Promise<void> {
+    if (!this.openPromise) {
+      this.openPromise = this.db.open()
+        .then(() => {
+          DevLog('Database connected', "info");
+        })
+        .catch((error) => {
+          this.openPromise = null;
+          this.logError(error);
+          throw error;
+        });
     }
+
+    await this.openPromise;
+  }
+
+  async init(): Promise<void> {
+    await this.ready();
+  }
+
+  close(): void {
+    this.db.close();
+    this.openPromise = null;
   }
 
   /*

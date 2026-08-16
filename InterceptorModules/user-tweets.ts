@@ -47,9 +47,8 @@ export const UserTweetsInterceptor: Interceptor = (req, res) => {
     window.dispatchEvent(new CustomEvent('dataInterceptedEvent', { detail: {data:res.responseText, type: "api_user-tweets", timestamp: new Date().toISOString() }}));
     
   } catch (err) {
-    DevLog(req.method, req.url, res.status, res.responseText,"debug")
+    DevLog("UserTweets interceptor failed", req.method, req.url, res.status, "debug")
     //logger.debug(req.method, req.url, res.status, res.responseText);
     //logger.errorWithBanner('UserTweets: Failed to parse API response', err as Error);
   }
 };
-
