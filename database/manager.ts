@@ -6,15 +6,16 @@ import packageJson from '@/package.json';
 import { DevLog } from "~utils/devUtils";
 import { exportDB } from 'dexie-export-import';
 
-const DB_NAME = packageJson.name;
-const DB_VERSION = 2;
+export const CONTENT_DATABASE_NAME = packageJson.name;
+export const CONTENT_DATABASE_VERSION = 2;
 
 export class DatabaseManager {
   private db: Dexie;
+  private openPromise: Promise<void> | null = null;
 
-  constructor() {
-    this.db = new Dexie(DB_NAME);
-    this.init();
+  constructor(databaseName = CONTENT_DATABASE_NAME) {
+    this.db = new Dexie(databaseName);
+    this.configureSchema();
   }
 
   /*
@@ -170,29 +171,47 @@ export class DatabaseManager {
   |--------------------------------------------------------------------------
   */
 
-  async init() {
+  private configureSchema() {
     // Indexes for the "captures" table.
     const captureIndexPaths: KeyPaths<Capture>[] = ['id', 'extension', 'type', 'created_at'];
 
     // Take care of database schemas and versioning.
     // See: https://dexie.org/docs/Tutorial/Design#database-versioning
-    try {
-      this.db
-        .version(DB_VERSION)
-        .stores({
-          tweets: null,
-          users: null,
-          captures: captureIndexPaths.join(','),
-        })
-        .upgrade(async () => {
-          DevLog('Database upgraded', "info");
-        });
+    this.db
+      .version(CONTENT_DATABASE_VERSION)
+      .stores({
+        tweets: null,
+        users: null,
+        captures: captureIndexPaths.join(','),
+      })
+      .upgrade(async () => {
+        DevLog('Database upgraded', "info");
+      });
+  }
 
-      await this.db.open();
-      DevLog('Database connected', "info");
-    } catch (error) {
-      this.logError(error);
+  async ready(): Promise<void> {
+    if (!this.openPromise) {
+      this.openPromise = this.db.open()
+        .then(() => {
+          DevLog('Database connected', "info");
+        })
+        .catch((error) => {
+          this.openPromise = null;
+          this.logError(error);
+          throw error;
+        });
     }
+
+    await this.openPromise;
+  }
+
+  async init(): Promise<void> {
+    await this.ready();
+  }
+
+  close(): void {
+    this.db.close();
+    this.openPromise = null;
   }
 
   /*

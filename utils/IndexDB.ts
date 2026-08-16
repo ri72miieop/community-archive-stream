@@ -255,4 +255,8 @@ export async function cleanupOldRecords(maxRecords = 10000): Promise<number> {
   }
 }
 
+export async function ensurePolicySafeIndexedDb(): Promise<void> {
+  await indexDB.open();
+}
+
 export { indexDB };
