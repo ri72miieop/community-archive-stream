@@ -6,7 +6,7 @@ import { DevLog, isDev } from "~utils/devUtils"
 import { GlobalCachedData } from "./Storage/CachedData"
 
 export const config: PlasmoCSConfig = {
-  matches: ["https://*.x.com/*"],
+  matches: ["https://*.x.com/*", "https://*.twitter.com/*"],
   run_at: "document_start"
 }
 
@@ -28,7 +28,7 @@ async function init() {
           body: {
             data: dataObject,
             type: type,
-            timestamp: dataObject.timestamp,
+            timestamp: event.detail.timestamp,
             date_added: new Date().toISOString()
           }
         })

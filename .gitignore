@@ -8,6 +8,8 @@
 
 # testing
 /coverage
+/.playwright-cli/
+/output/
 
 # misc
 .DS_Store
@@ -30,7 +32,7 @@ dist/
 .plasmo
 
 # typescript
-.tsbuildinfo
+*.tsbuildinfo
 
 *.env*
 *.claude*

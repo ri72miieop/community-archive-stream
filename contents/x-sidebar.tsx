@@ -1,68 +1,47 @@
-import iconBase64 from "data-base64:~assets/icon.png"
 import cssText from "data-text:~/contents/x-sidebar.css"
 import type { PlasmoCSConfig } from "plasmo"
-import { useEffect, useState } from "react"
+import { useState } from "react"
+
 import { sendToBackground } from "@plasmohq/messaging"
-// Inject to the webpage itself
-import "./x-sidebar-base.css"
 
 export const config: PlasmoCSConfig = {
-  matches: [ "https://*.twittter.com/*"]
+  matches: [
+    "https://x.com/*",
+    "https://www.x.com/*",
+    "https://twitter.com/*",
+    "https://www.twitter.com/*"
+  ]
 }
-
-// Inject into the ShadowDOM
+export const getShadowHostId = () => "ca-companion-launcher"
 export const getStyle = () => {
   const style = document.createElement("style")
   style.textContent = cssText
   return style
 }
 
-export const getShadowHostId = () => "plasmo-x-sidebar"
-
-
-
-// Function to attach to your button's click handler
-
-
-
-const GoogleSidebar = () => {
-  const [isOpen, setIsOpen] = useState(false)
-
-
-
-  const openSidePanel = async () => {
+export default function CompanionLauncher() {
+  const [error, setError] = useState("")
+  async function open() {
     try {
-      await sendToBackground({
+      const result = await sendToBackground({
         name: "open-sidepanel",
-        body: {
-          open: true
-        }
+        body: { open: true }
       })
-    } catch (error) {
-      console.error("Failed to open side panel:", error)
+      if (!result.success) throw new Error()
+      setError("")
+    } catch {
+      setError("Open Community Archive from the browser toolbar.")
     }
   }
-
-  const openSidePanel2 = async () => {
-    try {
-      await sendToBackground({
-        name: "open-sidepanel",
-        body: {
-          open: true
-        }
-      })
-    } catch (error) {
-      console.error("Failed to close side panel:", error)
-    }
-  }
-
   return (
-    <div id="sidebar" className={isOpen ? "open" : "closed"}>
-      <button className="sidebar-toggle" onClick={openSidePanel2}>
-        {isOpen ? "🟡 Close" : "🟣 Open"}
+    <div className="ca-launcher">
+      <button
+        onClick={open}
+        title="Open Community Archive companion"
+        aria-label="Open Community Archive companion">
+        <span aria-hidden="true">✳</span> Archive
       </button>
+      {error && <p role="status">{error}</p>}
     </div>
   )
 }
-
-export default GoogleSidebar

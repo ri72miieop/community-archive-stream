@@ -1,36 +1,39 @@
-#sidebar {
-  position: absolute;
-
-  background-color: #1b141d;
-  width: var(--plasmo-x-sidebar-width);
-  height: 100vh;
-
+.ca-launcher {
+  position: fixed;
+  right: 20px;
+  bottom: 90px;
+  z-index: 2147483640;
+  font-family: system-ui, sans-serif;
+}
+.ca-launcher button {
   display: flex;
   align-items: center;
-  justify-content: center;
-  flex-direction: column;
-
-  transition: all 0.5s ease;
+  gap: 8px;
+  color: #fffaf1;
+  background: #264b40;
+  border: 1px solid #547869;
+  border-radius: 30px;
+  padding: 11px 17px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 20px #0002;
 }
-
-#sidebar.open {
-  left: calc(var(--plasmo-x-sidebar-width) * -1);
+.ca-launcher button:hover {
+  background: #355d4f;
 }
-
-#sidebar.closed {
-  left: 0px;
+.ca-launcher button:focus-visible {
+  outline: 3px solid #b1ccbf;
+  outline-offset: 3px;
 }
-
-#sidebar p {
-  padding: 0 24px;
-  font-weight: bold;
-  text-align: center;
-  font-size: 24px;
-  font-family: sans-serif;
+.ca-launcher span {
+  font-size: 20px;
 }
-
-.sidebar-toggle {
-  position: fixed;
-  right: 4.7px;
-  bottom: 47px;
+.ca-launcher p {
+  max-width: 210px;
+  padding: 10px;
+  background: #fffaf1;
+  color: #264b40;
+  border-radius: 8px;
+  font-size: 12px;
 }

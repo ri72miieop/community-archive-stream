@@ -21,7 +21,10 @@
     "build2:prod": "plasmo build --tag=prod2 --env=.env.production --zip --hoist --no-minify",
     "clean": "if exist .plasmo rd /s /q .plasmo && if exist .parcel-cache rd /s /q .parcel-cache && if exist node_modules rd /s /q node_modules && pnpm install",
     "dev:clean": "pnpm clean && pnpm dev",
-    "dev:debug": "plasmo dev --entry=options --env=.env.development --verbose --debug --no-optimize"
+    "dev:debug": "plasmo dev --entry=options --env=.env.development --verbose --debug --no-optimize",
+    "test:companion": "bun test companion/*.test.ts",
+    "test:reading-db": "bash scripts/test-reading-db.sh",
+    "preview:companion": "bun scripts/preview-companion.ts"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.6.0",
@@ -85,11 +88,14 @@
     "permissions": [
       "storage",
       "sidePanel",
-      "cookies"
+      "cookies",
+      "alarms"
     ],
     "host_permissions": [
       "https://*.twitter.com/*",
-      "https://*.x.com/*"
+      "https://*.x.com/*",
+      "https://www.community-archive.org/*",
+      "https://*.supabase.co/*"
     ],
     "web_accessible_resources": [
       {
@@ -106,7 +112,8 @@
           "$CRX_ID"
         ]
       }
-    ]
+    ],
+    "minimum_chrome_version": "116"
   },
   "trustedDependencies": [
     "@parcel/watcher",
