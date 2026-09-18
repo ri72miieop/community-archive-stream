@@ -147,6 +147,11 @@ export default function Companion({
   const mounted = useRef(true)
   const accountId = snapshot.account?.id
   const current = pinned || snapshot.current
+  const notice =
+    message ||
+    (settings || tab === "memory" || tab === "attention" || snapshot.queued > 0
+      ? snapshot.error
+      : null)
 
   useEffect(() => {
     let live = true
@@ -787,13 +792,18 @@ export default function Companion({
           </main>
         </>
       )}
-      {(message || snapshot.error) && (
+      {notice && (
         <div className="notice" role="status">
-          {message || snapshot.error}
+          {notice}
         </div>
       )}
       <footer className="status-bar">
-        <span>
+        <span
+          title={
+            snapshot.account
+              ? `Connected as ${snapshot.account.label}`
+              : undefined
+          }>
           <Cloud size={13} />
           {!ready
             ? "Connecting…"
@@ -801,9 +811,11 @@ export default function Companion({
               ? "Account not connected"
               : snapshot.queued
                 ? `${snapshot.queued} waiting to sync`
-                : snapshot.preferences?.enabled
-                  ? "Private history on"
-                  : "Private history paused"}
+                : !snapshot.preferences
+                  ? "Account connected"
+                  : snapshot.preferences.enabled
+                    ? "Private history on"
+                    : "Private history paused"}
         </span>
         <button
           disabled={busy}
