@@ -87,6 +87,21 @@ export function verifyReadingDOM() {
         standard[0].tweet.tweetId === "123" &&
         standard[0].tweet.text === "Original main text"
     )
+    const linkedTimestamp = read(
+      `<article data-testid="tweet"><div data-testid="User-Name">Reader</div><div role="link"><time>Quoted timestamp without an anchor</time><div data-testid="tweetText">Quoted pacing text</div></div><a role="link" href="${subject}"><time>Now</time></a><div data-testid="tweetText">Actual pacing post</div></article>`
+    )
+    check(
+      "a role=link timestamp anchor belongs to its parent post",
+      linkedTimestamp.length === 1 &&
+        linkedTimestamp[0].tweet.tweetId === "123" &&
+        linkedTimestamp[0].tweet.text === "Actual pacing post"
+    )
+    check(
+      "a quote alone cannot supply the parent post identity",
+      read(
+        `<article data-testid="tweet">${quote}<div data-testid="tweetText">Parent without a permalink</div></article>`
+      ).length === 0
+    )
     return checks
   } finally {
     frame.remove()

@@ -102,16 +102,21 @@ export function readVisibleTweets(
       if (!tweet) return []
     } else {
       // Use the author's timestamp, not the last status link (which may be a quote).
-      const timestamp =
-        Array.from(article.querySelectorAll("time")).find(
-          (time) => !time.closest('[role="link"]')
-        ) ?? article.querySelector("time")
+      const timestamp = Array.from(article.querySelectorAll("time")).find(
+        (time) =>
+          time.closest("article") === article &&
+          !time.closest('[role="link"]:not(a)')
+      )
       const href = timestamp?.closest("a")?.getAttribute("href")
       const match = href?.match(/^\/(\w{1,15})\/status\/(\d{1,25})(?:\?|$|\/)/)
       if (!match) return []
       const textNode = Array.from(
         article.querySelectorAll<HTMLElement>('[data-testid="tweetText"]')
-      ).find((node) => !node.closest('[role="link"]'))
+      ).find(
+        (node) =>
+          node.closest("article") === article &&
+          !node.closest('[role="link"]:not(a)')
+      )
       const author = article.querySelector<HTMLElement>(
         '[data-testid="User-Name"]'
       )
