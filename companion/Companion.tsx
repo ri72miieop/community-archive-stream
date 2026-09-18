@@ -7,11 +7,13 @@ import {
   Eye,
   LayoutGrid,
   LockKeyhole,
+  Moon,
   Pause,
   Pin,
   Search,
   Settings2,
-  Sparkles
+  Sparkles,
+  Sun
 } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 
@@ -102,6 +104,23 @@ export default function Companion({
 }) {
   const [snapshot, setSnapshot] = useState<PanelSnapshot>(blank)
   const [ready, setReady] = useState(false)
+  const [theme, setTheme] = useState<"dark" | "light">(() => {
+    try {
+      return localStorage.getItem("ca-companion-theme") === "light"
+        ? "light"
+        : "dark"
+    } catch {
+      return "dark"
+    }
+  })
+  useEffect(() => {
+    document.documentElement.dataset.caTheme = theme
+    try {
+      localStorage.setItem("ca-companion-theme", theme)
+    } catch {
+      // Appearance still works if browser storage is unavailable.
+    }
+  }, [theme])
   const [tab, setTab] = useState<Tab>("context")
   const [explore, setExplore] = useState<ExploreSelection | null>(null)
   function openExplore(feature: Feature) {
@@ -261,19 +280,26 @@ export default function Companion({
         <div className="demo-ribbon">INTERACTIVE PREVIEW · SAMPLE DATA</div>
       )}
       <header className="brand">
-        <span className="brand-mark" aria-hidden="true">
-          ✳
-        </span>
-        <div>
+        <span className="brand-mark" aria-hidden="true" />
+        <div className="brand-copy">
           <strong>Community Archive</strong>
           <span>A companion for your curiosity</span>
         </div>
-        <button
-          className="icon-button"
-          aria-label={settings ? "Close controls" : "Open controls"}
-          onClick={() => setSettings(!settings)}>
-          <Settings2 size={18} />
-        </button>
+        <div className="brand-actions">
+          <button
+            className="icon-button"
+            aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
+            title={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
+            {theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}
+          </button>
+          <button
+            className="icon-button"
+            aria-label={settings ? "Close controls" : "Open controls"}
+            onClick={() => setSettings(!settings)}>
+            <Settings2 size={18} />
+          </button>
+        </div>
       </header>
       {settings ? (
         <main className="panel-body controls">

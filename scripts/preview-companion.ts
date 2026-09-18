@@ -2,6 +2,7 @@
 const result = await Bun.build({
   entrypoints: ["./companion/preview.tsx"],
   target: "browser",
+  loader: { ".woff2": "file", ".png": "file" },
   outdir: "./build/companion-preview",
   minify: false
 })

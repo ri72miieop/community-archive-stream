@@ -34,6 +34,14 @@ search, and a traversable graph neighborhood. The detailed
 [design and release boundaries](memos/20260917-1619-community-archive-companion-design.md)
 describe implemented behavior and follow-ups.
 
+The companion follows the website's Petrona headings, Manrope body text, CA
+logo, and neutral/blue palette. `companion/ca-theme.css` keeps the visual tokens
+together, matching the website's `src/app/globals.css` and font setup. It opens
+in the site's default dark theme; the header toggle remembers a local light
+or dark preference. Latin variable fonts and the logo are bundled with the
+extension, with font licenses under `assets/fonts/`; no font service is called
+while browsing.
+
 Preview the UI locally, without accounts or external services:
 
 ```bash

@@ -1,3 +1,4 @@
+import caLogo from "data-base64:~assets/ca-logo.png"
 import cssText from "data-text:~/contents/x-sidebar.css"
 import type { PlasmoCSConfig } from "plasmo"
 import { useState } from "react"
@@ -39,7 +40,7 @@ export default function CompanionLauncher() {
         onClick={open}
         title="Open Community Archive companion"
         aria-label="Open Community Archive companion">
-        <span aria-hidden="true">✳</span> Archive
+        <img src={caLogo} alt="" width={24} height={24} /> Archive
       </button>
       {error && <p role="status">{error}</p>}
     </div>

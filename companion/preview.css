@@ -1,5 +1,5 @@
 body {
-  background: #eeefe9;
+  background: #f4f4f5;
 }
 .preview-layout {
   display: grid;
@@ -13,50 +13,50 @@ body {
   flex-direction: column;
   gap: 27px;
   padding: 30px 25px;
-  color: #777d72;
+  color: #71717a;
   font-size: 16px;
 }
 .x-logo {
   font-size: 34px;
-  color: #273427;
+  color: #18181b;
 }
 .preview-nav small {
   margin-top: auto;
   font-size: 8px;
   letter-spacing: 1.4px;
   line-height: 1.8;
-  color: #98a08d;
+  color: #71717a;
 }
 .preview-timeline {
   background: #fff;
-  color: #253b2c;
-  border-left: 1px solid #e0e3dc;
+  color: #18181b;
+  border-left: 1px solid #e4e4e7;
   overflow-y: auto;
 }
 .preview-timeline > header {
   padding: 24px 38px;
   font-size: 13px;
   font-weight: 600;
-  border-bottom: 1px solid #e9ebe5;
+  border-bottom: 1px solid #e4e4e7;
 }
 .preview-timeline > header > span {
   margin-left: 110px;
-  color: #9da496;
+  color: #71717a;
   font-weight: 400;
 }
 .preview-compose {
-  border-bottom: 1px solid #e9ebe5;
+  border-bottom: 1px solid #e4e4e7;
   padding: 30px;
-  color: #b0b5a9;
+  color: #a1a1aa;
   font-size: 17px;
 }
 .preview-post {
   padding: 28px 30px 20px;
-  border-bottom: 1px solid #e9ebe5;
+  border-bottom: 1px solid #e4e4e7;
 }
 .preview-post.active {
-  box-shadow: inset -3px 0 #bccfaa;
-  background: #fffefa;
+  box-shadow: inset -3px 0 #1e9bcd;
+  background: #fafafa;
 }
 .preview-author {
   display: flex;
@@ -66,18 +66,18 @@ body {
 .preview-author > span {
   display: grid;
   place-items: center;
-  background: #e9e5d7;
-  color: #928870;
+  background: #e4e4e7;
+  color: #71717a;
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  font-family: Georgia, serif;
+  font-family: var(--font-serif);
 }
 .preview-author > strong {
   font-size: 13px;
 }
 .preview-author small {
-  color: #9ba291;
+  color: #71717a;
   font-weight: 400;
   font-size: 11px;
   margin-left: 6px;
@@ -86,31 +86,31 @@ body {
   font-size: 16px;
   line-height: 1.7;
   margin: 18px 0;
-  color: #506044;
+  color: #3f3f46;
 }
 .preview-quote {
   padding: 37px 26px;
-  background: #e9ecdf;
+  background: #f4f4f5;
   border-radius: 11px;
-  font-family: Georgia, serif;
+  font-family: var(--font-serif);
   font-size: 25px;
   line-height: 1.5;
-  color: #526744;
+  color: #3f3f46;
   letter-spacing: -0.7px;
 }
 .preview-quote em {
-  color: #7e8c6d;
+  color: #71717a;
 }
 .preview-quote > span {
   display: block;
-  font-family: system-ui;
+  font-family: var(--font-sans);
   letter-spacing: 1.6px;
   font-size: 8px;
   margin-top: 25px;
-  color: #91a080;
+  color: #71717a;
 }
 .preview-reactions {
-  color: #a4ad99;
+  color: #71717a;
   font-size: 11px;
   margin-top: 22px;
 }
@@ -120,18 +120,18 @@ body {
   padding: 0;
   margin-top: 22px;
   font-size: 10px;
-  color: #81966f;
+  color: #10516b;
 }
 .preview-caption {
   margin: 28px;
   font-size: 11px;
   line-height: 1.8;
-  color: #9da68f;
+  color: #71717a;
 }
 .preview-panel {
-  background: #f7f7f0;
+  background: var(--background);
   overflow-y: auto;
-  border-left: 1px solid #dce1d2;
+  border-left: 1px solid var(--border);
   position: relative;
 }
 .preview-panel .status-bar {
@@ -153,7 +153,7 @@ body {
     display: none;
   }
 }
-@media (max-width: 650px) {
+@media (max-width: 700px) {
   .preview-layout {
     display: block;
   }

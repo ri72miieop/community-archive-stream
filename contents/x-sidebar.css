@@ -9,31 +9,32 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #fffaf1;
-  background: #264b40;
-  border: 1px solid #547869;
+  color: #fafafa;
+  background: #111113;
+  border: 1px solid #3f3f46;
   border-radius: 30px;
-  padding: 11px 17px;
+  padding: 9px 15px;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   box-shadow: 0 4px 20px #0002;
 }
 .ca-launcher button:hover {
-  background: #355d4f;
+  background: #27272a;
 }
 .ca-launcher button:focus-visible {
-  outline: 3px solid #b1ccbf;
+  outline: 3px solid #75c9eb;
   outline-offset: 3px;
 }
-.ca-launcher span {
-  font-size: 20px;
+.ca-launcher img {
+  display: block;
+  object-fit: contain;
 }
 .ca-launcher p {
   max-width: 210px;
   padding: 10px;
-  background: #fffaf1;
-  color: #264b40;
+  background: #fafafa;
+  color: #111113;
   border-radius: 8px;
   font-size: 12px;
 }

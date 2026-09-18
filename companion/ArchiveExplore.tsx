@@ -204,15 +204,15 @@ function TrendChart({ data }: { data: TrendData }) {
         viewBox="0 0 300 125"
         role="img"
         aria-label={`${data.term}, ${raw ? "post counts" : "posts per 100,000"}, ${data.buckets[0]} to ${data.buckets.at(-1)}`}>
-        <line x1="12" y1="105" x2="288" y2="105" stroke="#d3ddca" />
+        <line x1="12" y1="105" x2="288" y2="105" stroke="var(--border)" />
         <polygon
           points={`12,105 ${points} ${x(values.length - 1)},105`}
-          fill="#e3ebd9"
+          fill="var(--chart-fill)"
         />
         <polyline
           points={points}
           fill="none"
-          stroke="#638655"
+          stroke="var(--chart-accent)"
           strokeWidth="2.5"
           strokeLinejoin="round"
         />
@@ -220,7 +220,7 @@ function TrendChart({ data }: { data: TrendData }) {
           cx={x(selected)}
           cy={y(values[selected])}
           r="4"
-          fill="#385b3f"
+          fill="var(--brand-deep)"
         />
       </svg>
       <input
@@ -276,25 +276,25 @@ function GraphView({
               y1="110"
               x2={n.x}
               y2={n.y}
-              stroke="#c4d3b9"
+              stroke="var(--brand-border)"
               strokeWidth="1.5"
             />
           ))}
-          <circle cx="150" cy="110" r="28" fill="#43694b" />
+          <circle cx="150" cy="110" r="28" fill="var(--brand-deep)" />
           <text
             x="150"
             y="115"
             textAnchor="middle"
-            fill="#fffdf2"
+            fill="var(--brand-foreground)"
             fontSize="19"
-            fontFamily="Georgia">
+            fontFamily="var(--font-serif)">
             {data.focus.name.slice(0, 1)}
           </text>
           <text
             x="150"
             y="154"
             textAnchor="middle"
-            fill="#486141"
+            fill="var(--foreground)"
             fontSize="10">
             @{data.focus.username}
           </text>
@@ -315,14 +315,14 @@ function GraphView({
                 cx={n.x}
                 cy={n.y}
                 r="18"
-                fill="#e0e9d6"
-                stroke="#b8caaa"
+                fill="var(--brand-soft)"
+                stroke="var(--brand-border)"
               />
               <text
                 x={n.x}
                 y={n.y + 4}
                 textAnchor="middle"
-                fill="#617954"
+                fill="var(--brand-deep)"
                 fontSize="13">
                 {n.name.slice(0, 1)}
               </text>
