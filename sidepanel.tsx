@@ -1,6 +1,7 @@
 import { sendToBackground } from "@plasmohq/messaging"
 
 import Companion, { type CompanionAPI } from "~companion/Companion"
+import CompanionBoundary from "~companion/CompanionBoundary"
 
 import "~companion/companion.css"
 
@@ -22,5 +23,9 @@ const api: CompanionAPI = {
   }
 }
 export default function SidePanel() {
-  return <Companion api={api} />
+  return (
+    <CompanionBoundary openSettings={api.openSettings}>
+      <Companion api={api} />
+    </CompanionBoundary>
+  )
 }

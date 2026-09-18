@@ -5,6 +5,7 @@ import Dexie, { type Table } from "dexie"
 import { GlobalCachedData } from "~contents/Storage/CachedData"
 import { supabase } from "~core/supabase"
 
+import { parseContextArchive } from "./context-archive"
 import {
   keywords,
   type ContextResult,
@@ -325,21 +326,7 @@ async function archiveSearch(query: string): Promise<ReadingTweet[]> {
       Date.now() + Math.min(300, Math.max(30, retrySeconds)) * 1000
     throw new Error("Public archive is temporarily unavailable.")
   }
-  const payload = await response.json()
-  if (!Array.isArray(payload.data?.tweets))
-    throw new Error("Public archive returned an unexpected response.")
-  const tweets: ReadingTweet[] = payload.data.tweets
-    .filter(
-      (t: any) =>
-        /^\d{1,25}$/.test(t.tweetId) && /^[\w]{1,15}$/.test(t.username)
-    )
-    .map((t: any) => ({
-      tweetId: t.tweetId,
-      username: t.username,
-      displayName: t.accountDisplayName || t.username,
-      text: t.fullText,
-      pageKind: "other"
-    }))
+  const tweets = parseContextArchive(await response.json())
   if (archiveCache.size >= 30)
     archiveCache.delete(archiveCache.keys().next().value)
   archiveCache.set(query, { at: Date.now(), tweets })

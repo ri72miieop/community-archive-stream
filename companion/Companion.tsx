@@ -59,6 +59,7 @@ function TweetCard({
   source: "archive" | "private"
   hint?: string
 }) {
+  const author = tweet.displayName || tweet.username || "Unknown author"
   return (
     <a
       className="tweet-card"
@@ -71,11 +72,11 @@ function TweetCard({
       rel="noreferrer">
       <div className="tweet-author">
         <span className={`avatar ${source}`}>
-          {(tweet.displayName || tweet.username).slice(0, 1).toUpperCase()}
+          {author.slice(0, 1).toUpperCase()}
         </span>
         <div>
-          <strong>{tweet.displayName || tweet.username}</strong>
-          <small>@{tweet.username}</small>
+          <strong>{author}</strong>
+          {tweet.username && <small>@{tweet.username}</small>}
         </div>
         <ArrowUpRight size={14} />
       </div>
