@@ -12,6 +12,9 @@
 body {
   margin: 0;
 }
+[hidden] {
+  display: none !important;
+}
 button,
 input,
 select {
@@ -42,10 +45,24 @@ a {
   color: inherit;
 }
 .companion {
-  min-height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
   max-width: 620px;
   margin: auto;
-  padding-bottom: 52px;
+}
+.browsing {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.brand,
+.tabs,
+.status-bar,
+.notice,
+.demo-ribbon {
+  flex-shrink: 0;
 }
 .brand {
   display: flex;
@@ -124,6 +141,9 @@ a {
 }
 .panel-body {
   padding: 25px 22px 20px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 }
 .eyebrow {
   font-size: 10px;
@@ -331,9 +351,6 @@ h2 {
   flex-shrink: 0;
 }
 .status-bar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
   width: 100%;
   background: var(--card);
   border-top: 1px solid var(--border);
@@ -403,6 +420,9 @@ h2 {
   background: none;
   color: var(--foreground);
   font-size: 12px;
+}
+.search .text-button {
+  margin: 0;
 }
 .list-caption {
   display: flex;
@@ -1032,6 +1052,13 @@ h2 {
 }
 .graph-person > span:nth-child(2) {
   flex: 1;
+}
+.graph-person > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.graph-back {
+  margin: 14px 0 0;
 }
 .graph-person strong {
   font-size: 12px;

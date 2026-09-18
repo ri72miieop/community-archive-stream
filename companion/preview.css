@@ -130,20 +130,9 @@ body {
 }
 .preview-panel {
   background: var(--background);
-  overflow-y: auto;
+  overflow: hidden;
   border-left: 1px solid var(--border);
   position: relative;
-}
-.preview-panel .status-bar {
-  position: sticky;
-  bottom: 0;
-  margin-top: auto;
-}
-.preview-panel .companion {
-  padding-bottom: 0;
-  display: flex;
-  flex-direction: column;
-  min-height: 100%;
 }
 @media (max-width: 980px) {
   .preview-layout {
@@ -162,12 +151,5 @@ body {
   }
   .preview-panel {
     min-height: 100vh;
-    overflow: visible;
-  }
-  .preview-panel .status-bar {
-    position: fixed;
-  }
-  .preview-panel .companion {
-    padding-bottom: 40px;
   }
 }

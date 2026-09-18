@@ -22,7 +22,7 @@ import {
   type TrendData
 } from "./archive-contract"
 import type { CompanionAPI } from "./Companion"
-import { keywords, type ReadingTweet } from "./types"
+import { contextQuery, keywords, type ReadingTweet } from "./types"
 
 export const archiveTools = [
   {
@@ -73,7 +73,7 @@ const when = (value: string) =>
     : ""
 
 function seed(feature: Feature, current: ReadingTweet | null): ArchiveInput {
-  const term = current ? keywords(current.text)[0] || "" : ""
+  const term = current ? contextQuery(current.text) : ""
   return {
     feature,
     ...(feature === "graph" ? { graphWindow: "recent" as const } : {}),
@@ -350,7 +350,13 @@ function GraphView({
             <strong>{n.name}</strong>
             <small>
               @{n.username} · {count(n.interactions)}{" "}
-              {data.days ? "replies" : "interactions"}
+              {data.days
+                ? n.interactions === 1
+                  ? "reply"
+                  : "replies"
+                : n.interactions === 1
+                  ? "interaction"
+                  : "interactions"}
             </small>
             {n.lastInteractionAt && (
               <small>Latest reply · {when(n.lastInteractionAt)}</small>
@@ -361,7 +367,9 @@ function GraphView({
       ))}
       {!data.neighbors.length && (
         <p className="quiet-state">
-          No retained connections for this person in this snapshot.
+          {data.days
+            ? "No replies to archived community members were found in this period."
+            : "No retained connections for this person in this snapshot."}
         </p>
       )}
       <p className="fine-print">
@@ -446,7 +454,10 @@ function Results({
         )
       return (
         <>
-          <TrendChart data={result.data} />
+          <TrendChart
+            key={`${result.data.term}:${result.data.granularity}`}
+            data={result.data}
+          />
           <h2 className="spaced">Recent examples</h2>
           {result.data.evidence.map((t) => (
             <ArchiveTweetCard key={t.id} tweet={t} />
@@ -516,6 +527,19 @@ export default function ArchiveExplore({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [revision, setRevision] = useState(0)
+  const [graphTrail, setGraphTrail] = useState<ArchiveInput[]>([])
+  const workspaces = useRef<
+    Partial<
+      Record<
+        Feature,
+        {
+          input: ArchiveInput
+          draft: ArchiveInput | null
+          graphTrail: ArchiveInput[]
+        }
+      >
+    >
+  >({})
   const request = useRef(0)
   const signature = JSON.stringify(input)
   useEffect(() => {
@@ -547,12 +571,21 @@ export default function ArchiveExplore({
       request.current++
     }
   }, [api, signature, revision])
-  function choose(feature: Feature) {
-    const value = seed(feature, current)
+  function remember() {
+    if (input) workspaces.current[input.feature] = { input, draft, graphTrail }
+  }
+  function choose(feature: Feature, reset = false) {
+    if (feature === input?.feature && !reset) return
+    remember()
+    const saved = reset ? undefined : workspaces.current[feature]
+    const value = saved?.input || seed(feature, current)
     setInput(value)
-    setDraft(value)
+    setDraft(saved?.draft || value)
+    setGraphTrail(saved?.graphTrail || [])
   }
   function person(username: string) {
+    if (input?.username === username) return
+    if (input?.username) setGraphTrail((trail) => [...trail.slice(-19), input])
     const value: ArchiveInput = {
       feature: "graph",
       username,
@@ -649,6 +682,7 @@ export default function ArchiveExplore({
           <button
             className="back"
             onClick={() => {
+              remember()
               setInput(null)
               setDraft(null)
             }}>
@@ -677,6 +711,7 @@ export default function ArchiveExplore({
             onSubmit={(e) => {
               e.preventDefault()
               if (draft) {
+                if (draft.feature === "graph") setGraphTrail([])
                 setInput({ ...draft, offset: 0 })
                 setRevision((v) => v + 1)
               }
@@ -826,16 +861,28 @@ export default function ArchiveExplore({
                   @{input.username || current.username} only
                 </label>
               )}
-              {current && (
+              {current && input.feature !== "trends" && (
                 <button
                   className="text-toggle"
                   type="button"
-                  onClick={() => choose(input.feature)}>
+                  onClick={() => choose(input.feature, true)}>
                   Use current tweet
                 </button>
               )}
             </div>
           </form>
+          {input.feature === "graph" && graphTrail.length > 0 && (
+            <button
+              className="back graph-back"
+              onClick={() => {
+                const previous = graphTrail[graphTrail.length - 1]
+                setGraphTrail((trail) => trail.slice(0, -1))
+                setInput(previous)
+                setDraft(previous)
+              }}>
+              <ArrowLeft size={13} /> Back to @{graphTrail.at(-1)?.username}
+            </button>
+          )}
           {result && <p className="section-caption">{result.explanation}</p>}
           {error && (
             <div className="feature-error" role="status">
@@ -858,7 +905,7 @@ export default function ArchiveExplore({
             </p>
           )}
           {input.feature === "trends" && input.q && (
-            <button className="back" onClick={() => choose("trends")}>
+            <button className="back" onClick={() => choose("trends", true)}>
               <ArrowLeft size={13} /> Trending words
             </button>
           )}

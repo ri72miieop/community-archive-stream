@@ -84,10 +84,11 @@ search endpoint and degrade gracefully when unavailable or rate limited.
 
 Explore uses `/api/companion/v1/{bangers,digest,trends,search,graph}` on CA. The
 website adapter reuses existing ranking, published editions, trend evidence,
-graph snapshots, and archive search. The API was deployed to production on
-September 17, 2026 ([website PR #991](https://github.com/TheExGenesis/community-archive/pull/991)).
-The unpacked extension has fetched real Bangers, Digest, Search, and Graph data;
-Trends correctly requires sign-in. The Chrome Web Store release and private
+graph snapshots, and archive search. The API and recent-neighbor gateway are
+deployed ([website PR #994](https://github.com/TheExGenesis/community-archive/pull/994),
+[gateway PR #224](https://github.com/TheExGenesis/community-archive-control-panel/pull/224)).
+The unpacked extension has fetched all five tools from production, including
+authenticated trending words and dated graph neighbors. The Chrome Web Store release and private
 history migration remain separate steps.
 Trends sends the reader's Supabase access token for server validation. Public
 feature reads send no token, viewing durations, or private-history records.
@@ -101,7 +102,10 @@ node scripts/sync-companion-contract.mjs /path/to/CA/src/lib/companion/contract.
 ```
 
 Context follows the visible/pinned tweet; Explore holds its selected subject
-until the reader chooses another or clicks Use current tweet. Automatic
+until the reader chooses another or clicks Use current tweet. Switching views,
+tools, or controls preserves Explore inputs and graph traversal; a Back button
+retraces graph neighbors. The header and view tabs stay visible while results
+scroll, and returning to Explore restores the scroll position. Automatic
 bangers/digest suggestions are debounced and spaced at least 12 seconds apart.
 Requests are deduplicated and cached for two minutes, with a 40-entry bound
 and 429/5xx cooldown. Media and quote payloads are preserved in result cards.
@@ -111,8 +115,9 @@ account/archive settings have website entry points in the Explore menu.
 The preview's data is fictional. The real X signed-out status layout has also
 been checked: its main post supplies context when its author and permalink
 agree with the page URL. Replies without stable tweet markup are skipped.
-Before release, verify real sign-in, authenticated Trends, signed-in timelines,
-cross-device history, and pause/delete against staging.
+Before releasing private history, verify cross-device history and pause/delete
+against staging. An unavailable history service shows an explicit unavailable
+state and disables history mutations, independently of account sign-in.
 
 
 ### Companion refinements
@@ -132,7 +137,6 @@ codes, pending logins expire, and URLs/tokens are never logged. Website cookies
 are not copied. No new Chrome permissions or Supabase redirect configuration
 are required. Close a login tab to cancel; use **Connect CA account** to retry.
 
-Release the gateway `recent-neighbors` endpoint, then the CA companion API
-refinements, before distributing this build. Earlier website releases can still
-return the labeled all-time graph. The private-history schema remains a separate
+Release the gateway before dependent CA companion API changes. Earlier website
+releases can still return the labeled all-time graph. The private-history schema remains a separate
 migration; connecting an account does not enable history or firehose capture.
