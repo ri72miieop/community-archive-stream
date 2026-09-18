@@ -1,0 +1,61 @@
+/* Match the website's src/app/globals.css and src/app/layout.tsx.
+   Keep brand tokens here so both interfaces can evolve together. */
+@font-face {
+  font-family: "Manrope";
+  src: url("../assets/fonts/manrope-latin-variable.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Petrona";
+  src: url("../assets/fonts/petrona-latin-variable.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+:root {
+  color-scheme: dark;
+  --font-sans: "Manrope", system-ui, sans-serif;
+  --font-serif: "Petrona", Georgia, "Times New Roman", serif;
+  --background: hsl(240 5% 7%);
+  --foreground: hsl(0 0% 96%);
+  --card: hsl(240 4% 11%);
+  --primary: hsl(0 0% 96%);
+  --primary-foreground: hsl(240 5% 9%);
+  --secondary: hsl(240 4% 16%);
+  --muted: hsl(240 4% 16%);
+  --muted-foreground: hsl(240 5% 68%);
+  --border: hsl(240 4% 16%);
+  --ring: hsl(0 0% 80%);
+  --brand: hsl(197 74.1% 69%);
+  --brand-foreground: hsl(240 5% 7%);
+  --brand-deep: hsl(197 75% 74%);
+  --brand-icon: hsl(197 74.1% 74%);
+  --chart-accent: var(--brand);
+  --danger: hsl(0 85% 72%);
+  --warning: hsl(38 85% 72%);
+  --radius: 8px;
+  --brand-soft: color-mix(in srgb, var(--brand) 10%, var(--card));
+  --brand-border: color-mix(in srgb, var(--brand) 32%, var(--border));
+  --chart-fill: color-mix(in srgb, var(--brand) 16%, transparent);
+}
+:root[data-ca-theme="light"] {
+  color-scheme: light;
+  --background: hsl(0 0% 100%);
+  --foreground: hsl(240 10% 3.9%);
+  --card: hsl(0 0% 100%);
+  --primary: hsl(240 5.9% 10%);
+  --primary-foreground: hsl(0 0% 98%);
+  --secondary: hsl(240 4.8% 95.9%);
+  --muted: hsl(240 4.8% 95.9%);
+  --muted-foreground: hsl(240 3.8% 46.1%);
+  --border: hsl(240 5.9% 90%);
+  --ring: hsl(240 5.9% 10%);
+  --brand: hsl(197 74.4% 46%);
+  --brand-foreground: hsl(0 0% 100%);
+  --brand-deep: hsl(197 74% 24.1%);
+  --brand-icon: hsl(197 74.1% 51%);
+  --danger: hsl(0 72% 42%);
+  --warning: hsl(30 80% 30%);
+}

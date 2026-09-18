@@ -42,7 +42,7 @@ export interface PreferenceMetadata {
 }
 export class TweetEnhancementPreferencesManager {
   private static readonly defaultPreferences: TweetEnhancementPreferences = {
-    interceptData: true,
+    interceptData: false,
     markTweetWithInterceptionStatus: false
   };
 

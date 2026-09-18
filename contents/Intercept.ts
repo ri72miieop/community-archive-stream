@@ -7,7 +7,7 @@ import { FavoriteTweetInterceptor } from "~InterceptorModules/favoriteTweet"
 import { FollowersInterceptor } from "~InterceptorModules/followers"
 import { FollowingInterceptor } from "~InterceptorModules/following"
 import { HomeTimelineInterceptor } from "~InterceptorModules/home-timeline"
-import { LikedTweetsInterceptor, LikesInterceptor } from "~InterceptorModules/likedTweets"
+import { LikedTweetsInterceptor } from "~InterceptorModules/likedTweets"
 import { TweetDetailInterceptor } from "~InterceptorModules/tweet-detail"
 import { UserTweetsInterceptor } from "~InterceptorModules/user-tweets"
 import { DevLog, isDev} from "~utils/devUtils"
@@ -17,7 +17,7 @@ import { ListTweetsInterceptor } from "~InterceptorModules/listTweets"
 
 //inspo: https://github.com/prinsss/twitter-web-exporter/blob/main/src/core/extensions/manager.ts#L59
 export const config: PlasmoCSConfig = {
-  matches: ["https://*.x.com/*"],
+  matches: ["https://*.x.com/*", "https://*.twitter.com/*"],
   run_at: "document_start",
   world: "MAIN"
 }

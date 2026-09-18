@@ -1,35 +1,31 @@
-import { useState } from "react"
+import { sendToBackground } from "@plasmohq/messaging"
 
-import "./prod.css"
+import Companion, { type CompanionAPI } from "~companion/Companion"
+import CompanionBoundary from "~companion/CompanionBoundary"
 
-import TweetEnhancementConfigTab from "~tabs/TweetEnhancementConfigTab"
-import { isDev } from "~utils/devUtils"
+import "~companion/companion.css"
 
-const navOptions = [
-  {
-    key: "tweetEnhancement",
-    isEnabled: true,
-    label: "Tweet Enhancement",
-    description: "Configure tweet enhancement features.",
-    component: TweetEnhancementConfigTab
+const api: CompanionAPI = {
+  async request(action, body = {}) {
+    const response = await sendToBackground({
+      name: "companion",
+      body: { action, ...body }
+    })
+    if (!response.ok) throw new Error(response.error)
+    return response.data
+  },
+  async activeTab() {
+    return (await chrome.tabs.query({ active: true, currentWindow: true }))[0]
+      ?.id
+  },
+  openSettings() {
+    chrome.runtime.openOptionsPage()
   }
-]
-
-const IndexSidePanel = () => {
-  const enabledNavOptions = isDev
-    ? navOptions
-    : navOptions.filter((option) => option.isEnabled)
-  const [activeOption, setActiveOption] = useState(enabledNavOptions[0].key)
-
-  const currentIndex = enabledNavOptions.findIndex(
-    (option) => option.key === activeOption
-  )
-
-  const ActiveComponent =
-    enabledNavOptions.find((option) => option.key === activeOption)
-      ?.component || null
-
-  return <>{<div>{ActiveComponent && <ActiveComponent />}</div>}</>
 }
-
-export default IndexSidePanel
+export default function SidePanel() {
+  return (
+    <CompanionBoundary openSettings={api.openSettings}>
+      <Companion api={api} />
+    </CompanionBoundary>
+  )
+}

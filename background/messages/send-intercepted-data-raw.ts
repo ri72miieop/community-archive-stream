@@ -5,8 +5,17 @@ import { getUser, type UserMinimal } from "~utils/dbUtils"
 
 import { DevLog, PLASMO_PUBLIC_RECORD_EXPIRY_SECONDS } from "~utils/devUtils"
 import { indexDB, type TimedObject } from "~utils/IndexDB"
+import { isReadingPage } from "~companion/types"
 
 const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
+  const sender = req.sender
+  const allowedTypes = new Set(["api_home-timeline", "api_search-timeline", "api_tweet-detail", "api_user-tweets", "api_liked_tweets", "api_list_tweets"])
+  if (sender?.id !== chrome.runtime.id || sender.frameId !== 0 || !isReadingPage(sender.url || "") || !allowedTypes.has(req.body?.type) || typeof req.body?.data !== "string" || req.body.data.length > 5_000_000) {
+    res.send({ success: false, error: "Invalid capture" }); return
+  }
+  if (!(await GlobalCachedData.GetEnhancementPreferences()).interceptData || !FIREHOSE_ENDPOINT_URL || !API_AUTH_TOKEN) {
+    res.send({ success: false, error: "Firehose contribution is off or not configured" }); return
+  }
   const type = req.body.type
   const user: UserMinimal = await getUser()
   const userIdFromCookies = await getUserId();
@@ -37,7 +46,7 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
       if(redisResult.success) {
         resObject = { success: true }
       } else {
-        await indexDB.data.update(req.body.originator_id, {
+        if (req.body.originator_id) await indexDB.data.update(req.body.originator_id, {
           canSendToCA: false,
           reason: redisResult.reason
         })
@@ -129,6 +138,7 @@ async function sendDataToRedisAPI(interceptedData: {
         await new Promise(resolve => setTimeout(resolve, delay));
       }
 
+      if (!(await GlobalCachedData.GetEnhancementPreferences()).interceptData) return { success: false, reason: "Firehose contribution paused" };
       const response = await fetch(FIREHOSE_ENDPOINT_URL, {
           method: 'POST',
           headers: {
@@ -143,7 +153,7 @@ async function sendDataToRedisAPI(interceptedData: {
       if (response.ok) {
           const responseData = await response.json();
 
-          let processedRecords = responseData.processedRecords;
+          let processedRecords = responseData.processedRecords ?? [];
           for (let item of processedRecords) {
             const record = item.record;
             let canSendToCA = item.success;

@@ -1,37 +1,24 @@
 import type { PlasmoMessaging } from "@plasmohq/messaging"
-import { DevLog } from "~utils/devUtils"
 
-// Define message metadata type
-type MessagesMetadata = {
+import { isTwitterPage } from "~companion/types"
 
-    open: boolean
-  
-}
-
-// Update handler with the metadata type
 const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
-    DevLog("Opening side panel")
-    try {
-        if(req.body.open) {
-            // Get the current window
-      const currentWindow = await chrome.windows.getCurrent()
-      
-      if (!currentWindow?.id) {
-        throw new Error("Could not get current window ID")
-      }
-
-      // Open the side panel with the correct window ID
-      await chrome.sidePanel.open({ windowId: currentWindow.id })
-            res.send({ success: true })
-
-        } else {
-            
-            res.send({ success: true })
-        }
-    } catch (error) {
-        res.send({ success: false, error: error })
-        console.error("Error opening side panel:", error)
-    }
+  const sender = req.sender
+  if (
+    sender?.id !== chrome.runtime.id ||
+    sender.frameId !== 0 ||
+    !sender.tab?.id ||
+    !isTwitterPage(sender.url || "")
+  ) {
+    res.send({ success: false })
+    return
+  }
+  try {
+    // Call immediately in the user gesture, before asynchronous work.
+    await chrome.sidePanel.open({ windowId: sender.tab.windowId })
+    res.send({ success: true })
+  } catch {
+    res.send({ success: false })
+  }
 }
-
-export default handler;
+export default handler
