@@ -63,7 +63,7 @@ export function isReadingPage(url: string): boolean {
   )
 }
 const STOP = new Set(
-  "about after again also another because been before being both could does doing dont even every from going have here into just know like more most much only other over really same should some something than that their them then there these they thing think this those through very want were what when where which while will with would your youre https http twitter".split(
+  "about after again also another because been before being best better both could does doing dont even every from going good have here into just know like make more most much only other over really same should some something than that their them then there these they thing think this those through very want were what when where which while will with would your youre https http twitter".split(
     " "
   )
 )

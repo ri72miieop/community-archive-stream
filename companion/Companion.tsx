@@ -5,6 +5,7 @@ import {
   Cloud,
   Compass,
   Eye,
+  LayoutGrid,
   LockKeyhole,
   Pause,
   Pin,
@@ -14,6 +15,11 @@ import {
 } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 
+import type { Feature } from "./archive-contract"
+import ArchiveExplore, {
+  ContextDiscoveries,
+  type ExploreSelection
+} from "./ArchiveExplore"
 import {
   tweetUrl,
   type ContextResult,
@@ -28,7 +34,7 @@ export type CompanionAPI = {
   activeTab(): Promise<number | undefined>
   openSettings(): void
 }
-type Tab = "context" | "memory" | "attention"
+type Tab = "context" | "explore" | "memory" | "attention"
 const minutes = (ms: number) =>
   ms < 60000 ? `${Math.round(ms / 1000)}s` : `${Math.round(ms / 60000)}m`
 const date = (ms: number) =>
@@ -97,6 +103,12 @@ export default function Companion({
   const [snapshot, setSnapshot] = useState<PanelSnapshot>(blank)
   const [ready, setReady] = useState(false)
   const [tab, setTab] = useState<Tab>("context")
+  const [explore, setExplore] = useState<ExploreSelection | null>(null)
+  function openExplore(feature: Feature) {
+    setExplore((previous) => ({ feature, serial: (previous?.serial || 0) + 1 }))
+    setTab("explore")
+    setMessage("")
+  }
   const [settings, setSettings] = useState(false)
   const [pinned, setPinned] = useState<ReadingTweet | null>(null)
   const [context, setContext] = useState<ContextResult | null>(null)
@@ -376,6 +388,7 @@ export default function Companion({
             {(
               [
                 ["context", Compass, "Context"],
+                ["explore", LayoutGrid, "Explore"],
                 ["memory", BookOpen, "Memory"],
                 ["attention", Eye, "Attention"]
               ] as const
@@ -503,7 +516,22 @@ export default function Companion({
                     </p>
                   </div>
                 )}
+                {current && (
+                  <ContextDiscoveries
+                    api={api}
+                    current={current}
+                    onExplore={openExplore}
+                  />
+                )}
               </>
+            )}
+            {tab === "explore" && (
+              <ArchiveExplore
+                key={`${accountId || "guest"}:${explore?.serial || 0}`}
+                api={api}
+                current={current}
+                selection={explore}
+              />
             )}
             {tab === "memory" && (
               <>

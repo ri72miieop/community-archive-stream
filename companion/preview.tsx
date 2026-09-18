@@ -1,5 +1,6 @@
 import { createRoot } from "react-dom/client"
 
+import { previewArchive } from "./archive-fixtures"
 import Companion, { type CompanionAPI } from "./Companion"
 import {
   previewContext,
@@ -17,6 +18,8 @@ let memories = [...previewMemories]
 const api: CompanionAPI = {
   async request<T>(action: string, body: Record<string, any> = {}): Promise<T> {
     switch (action) {
+      case "archive":
+        return (await previewArchive(body.input)) as T
       case "snapshot":
         return { ...snapshot } as T
       case "context":
@@ -119,7 +122,9 @@ function Preview() {
         <p className="preview-caption">
           An interactive design preview with fictional tweets.
           <br />
-          Try Context, Memory, Attention, pinning, and Controls.
+          Try Explore for Bangers, Digest, Trends, Search, and Graph.
+          <br />
+          Memory and Attention stay private to your account.
         </p>
       </section>
       <aside className="preview-panel">

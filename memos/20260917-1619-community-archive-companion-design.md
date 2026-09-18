@@ -4,7 +4,7 @@
 
 Make the archive useful at the moment someone is curious. The extension should help a reader place the current tweet in context, recover things they have seen, and reflect on where their time went. A native browser panel keeps the timeline usable and gives private history an extension-owned UI, outside the Twitter document.
 
-The first implementation extends **community-archive-stream**, preserving its XHR interception, endpoint parsers, identity handling, and firehose transport. It adds Context, Memory, Attention, and independent controls for cloud history and firehose contribution. Private history belongs to the signed-in CA account from the start, as requested. No paid model or new hosted service is required.
+The implementation extends **community-archive-stream**, preserving its XHR interception, endpoint parsers, identity handling, and firehose transport. It adds Context, Explore, Memory, Attention, and independent controls for cloud history and firehose contribution. Private history belongs to the signed-in CA account from the start, as requested. No paid model or new hosted service is required.
 
 The code and an interactive preview are ready for review. The new database migration is supplied alongside the feature, **not applied to a hosted database**. The preview uses fictional sample tweets. Release to users still requires migration promotion into the main CA repository, configured extension builds, and an authenticated staging smoke test.
 
@@ -53,6 +53,16 @@ History is kept until the user deletes it; there is no implied retention expiry 
 
 ## Deployment boundary
 
+### Shared website features
+
+Explore now contains compact versions of bangers, digest, trends, search, and graph. Bangers switches between the current author's curated profile and community rankings, with pagination. Digest shows published stories with expandable sources and date selection. Trends has an inspectable chart, raw/normalized values, interval selection, and evidence posts. Search supports phrases, the current author, and pagination. Graph lets a reader traverse a bounded neighborhood and continue on the website with that person selected.
+
+Context also suggests earlier author bangers and a relevant published digest story. These optional reads are debounced and spaced at least 12 seconds apart. Explore holds the reader's selected subject while the timeline changes; Use current tweet explicitly resets it. Stream, conversation maps/strands, bulletin, directory, apps, and archive settings remain website entry points in the compact menu.
+
+The website's `/api/companion/v1/{feature}` adapters reuse existing CA services. A single browser-safe contract is maintained in the website, with a generated, checksum-checked extension copy. Installed extensions validate response shapes, deduplicate requests, bound their cache, and cool down after rate limits or upstream errors. Public requests carry a topic/handle; only authenticated trends carries a session token. Private reading history never enters this API.
+
+The API must be released before the extension; 404 responses explicitly say it is awaiting release. The implementation and local fixture preview are ready for review. Actual staging OAuth and live service response checks remain release gates. The scope of this turn does not include deployment.
+
 The extension repository includes an additive migration and disposable PostgreSQL tests. Promote the reviewed migration into the main `community-archive` repository's canonical migration/schema workflow before release; it targets the existing CA Supabase project, not a separate service. The extension's `supabase/` directory is not a complete standalone project.
 
 Creating a migration PR in the main CA repository currently triggers a shared staging reset. This change therefore does not silently create that PR or apply the migration. No production database, firehose policy, public export, ClickHouse projection, or store listing was changed. The new private tables must stay out of public exports and analytical ingestion.
@@ -60,6 +70,9 @@ Creating a migration PR in the main CA repository currently triggers a shared st
 The existing extension OAuth setup and deployment credentials remain prerequisites. The local browser build used placeholder credentials and a local fixture server. A configured staging build still needs sign-in, cross-device sync, pause/delete, and real X DOM confirmation before release.
 
 ## Validation
+
+- The expanded companion has 13 focused tests (45 assertions), including response validation, credential isolation, caching, cooldown, link safety, and the earlier observation checks. The website adapters, graph deep link, and rate-limit boundaries pass 30 focused tests; website type-check and scoped lint pass.
+- Browser checks exercise bangers pagination, digest expansion, trend inspection, graph traversal, author-filtered search, and a 360px panel without horizontal overflow. All five feature messages were exercised in the actual unpacked extension with intercepted fixture responses; oversized inputs and unapproved UI senders were rejected. Production API data was not used for these passing checks.
 
 - Focused visibility tests cover brief exposure, foreground/background transitions, suspension gaps, duplicate rendered tweets, route exclusions, and schema validation.
 - An isolated real PostgreSQL instance verifies retries, search, account isolation, anonymous denial, owner reassignment denial, pause/resume/clear epochs, and account-deletion cascades.

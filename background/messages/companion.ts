@@ -2,6 +2,8 @@ import { z } from "zod"
 
 import type { PlasmoMessaging } from "@plasmohq/messaging"
 
+import { parseArchiveInput } from "~companion/archive-contract"
+import { archive } from "~companion/archive-service"
 import {
   captureConfig,
   configure,
@@ -59,6 +61,25 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
       )
     let data: unknown
     switch (action) {
+      case "archive": {
+        const input = z
+          .object({
+            feature: z.string(),
+            q: z.string().optional(),
+            username: z.string().optional(),
+            offset: z.number().optional(),
+            period: z.string().optional(),
+            granularity: z.string().optional(),
+            date: z.string().optional()
+          })
+          .parse(req.body.input)
+        const params = new URLSearchParams()
+        for (const [key, value] of Object.entries(input))
+          if (value !== undefined && key !== "feature")
+            params.set(key, String(value))
+        data = await archive(parseArchiveInput(input.feature, params))
+        break
+      }
       case "snapshot":
         data = await snapshot(z.number().int().optional().parse(req.body.tabId))
         break

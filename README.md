@@ -27,7 +27,10 @@ For further guidance, [visit our Documentation](https://docs.plasmo.com/)
 ## Context companion (draft)
 
 This branch adds a native right-side companion with contextual archive results,
-private reading-history search, and a seven-day attention view. The detailed
+an Explore area for CA's five discovery tools, private reading-history search,
+and a seven-day attention view. Explore includes author/community bangers,
+published digests with sources, trends with an inspectable chart, archive text
+search, and a traversable graph neighborhood. The detailed
 [design and release boundaries](memos/20260917-1619-community-archive-companion-design.md)
 describe implemented behavior and follow-ups.
 
@@ -68,3 +71,31 @@ pnpm build
 The DB check creates and destroys an isolated local database; it never connects
 to a hosted Supabase project. Public archive cards use the existing website
 search endpoint and degrade gracefully when unavailable or rate limited.
+
+## Shared website features
+
+Explore uses `/api/companion/v1/{bangers,digest,trends,search,graph}` on CA. The
+website adapter reuses existing ranking, published editions, trend evidence,
+graph snapshots, and archive search. Release that API before this extension;
+an unreleased endpoint is shown as unavailable rather than sample content.
+Trends sends the reader's Supabase access token for server validation. Public
+feature reads send no token, viewing durations, or private-history records.
+
+`companion/archive-contract.ts` is generated from the website's canonical
+`src/lib/companion/contract.ts`, with a SHA-256 source marker. To sync/check:
+
+```sh
+node scripts/sync-companion-contract.mjs /path/to/CA/src/lib/companion/contract.ts
+node scripts/sync-companion-contract.mjs /path/to/CA/src/lib/companion/contract.ts --check
+```
+
+Context follows the visible/pinned tweet; Explore holds its selected subject
+until the reader chooses another or clicks Use current tweet. Automatic
+bangers/digest suggestions are debounced and spaced at least 12 seconds apart.
+Requests are deduplicated and cached for two minutes, with a 40-entry bound
+and 429/5xx cooldown. Media and quote payloads are preserved in result cards.
+Live stream, conversation maps/strands, opportunities, profiles, apps, and
+account/archive settings have website entry points in the Explore menu.
+
+The preview's data is fictional. Before release, verify real sign-in, all five
+API shapes, rate limits, and real X context with a configured staging build.
