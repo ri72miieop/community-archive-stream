@@ -134,6 +134,11 @@ export default function Companion({
   const [context, setContext] = useState<ContextResult | null>(null)
   const [memories, setMemories] = useState<Memory[]>([])
   const [summary, setSummary] = useState<Summary | null>(null)
+  const [echoQuery, setEchoQuery] = useState<{
+    tweetId: string
+    value: string
+  } | null>(null)
+  const [echoDraft, setEchoDraft] = useState("")
   const [query, setQuery] = useState("")
   const [loading, setLoading] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -198,9 +203,16 @@ export default function Companion({
           if (settings) return
           if (tab === "context" && current) {
             const result = await api.request<ContextResult>("context", {
-              tweet: current
+              tweet: current,
+              query:
+                echoQuery?.tweetId === current.tweetId
+                  ? echoQuery.value
+                  : undefined
             })
-            if (live) setContext(result)
+            if (live) {
+              setContext(result)
+              setEchoDraft(result.query)
+            }
           } else if (tab === "memory" && accountId) {
             const result = await api.request<Memory[]>("memory", { query })
             if (live) setMemories(result)
@@ -225,7 +237,16 @@ export default function Companion({
       live = false
       clearTimeout(timer)
     }
-  }, [api, tab, query, current?.tweetId, accountId, settings, revision])
+  }, [
+    api,
+    tab,
+    query,
+    current?.tweetId,
+    accountId,
+    settings,
+    revision,
+    echoQuery
+  ])
 
   async function act(action: string, body?: Record<string, unknown>) {
     setBusy(true)
@@ -477,13 +498,36 @@ export default function Companion({
                     <p className="section-caption">
                       {context?.query ? (
                         <>
-                          Posts mentioning <b>{context.query}</b>. A starting
-                          point for exploring.
+                          Archive posts matching <b>{context.query}</b>.
                         </>
                       ) : (
                         "Connections from the public Community Archive."
                       )}
                     </p>
+                    <form
+                      className="search"
+                      onSubmit={(e) => {
+                        e.preventDefault()
+                        if (current && echoDraft.trim())
+                          setEchoQuery({
+                            tweetId: current.tweetId,
+                            value: echoDraft.trim()
+                          })
+                      }}>
+                      <Search size={14} />
+                      <input
+                        aria-label="Echoes search terms"
+                        maxLength={120}
+                        value={echoDraft}
+                        placeholder="Choose the ideas to connect"
+                        onChange={(e) => setEchoDraft(e.target.value)}
+                      />
+                      <button
+                        className="text-button"
+                        disabled={loading || !echoDraft.trim()}>
+                        Find
+                      </button>
+                    </form>
                     {loading ? (
                       <div className="loading" role="status">
                         Finding a little context…

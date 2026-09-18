@@ -108,6 +108,32 @@ export async function previewArchive(
           "Published stories related to the current topic appear first. This edition is fictional."
       }
     case "trends": {
+      if (!input.q)
+        return {
+          ...base,
+          feature: "trends",
+          explanation: "Weekly discoveries from the archive. Sample data.",
+          data: {
+            term: "",
+            granularity: "week",
+            buckets: [],
+            counts: [],
+            per100k: [],
+            computedAt: "2026-09-17",
+            evidence: [],
+            words: ["community memory", "pacing", "gardens", "agents"].map(
+              (term, i) => ({
+                term,
+                posts: 245 - i * 43,
+                lane: i === 3 ? "falling" : i === 0 ? "emerging" : "rising",
+                changePct: i === 0 ? null : i === 3 ? -24 : 48 + i * 12,
+                since: "2026-09-10",
+                until: "2026-09-16"
+              })
+            )
+          }
+        }
+
       const buckets = Array.from({ length: 12 }, (_, i) => {
         const d = new Date("2026-09-17T12:00:00Z")
         if (input.granularity === "year") return String(2015 + i)
@@ -143,7 +169,7 @@ export async function previewArchive(
         ...base,
         feature: "graph",
         explanation:
-          "Recorded mutual replies and quotes. A connection does not imply friendship or agreement.",
+          "People this author has replied to, ordered by latest reply. Sample data.",
         data: {
           focus,
           neighbors: focus
@@ -152,11 +178,13 @@ export async function previewArchive(
                 .map((p, i) => ({
                   ...p,
                   interactions: 43 - i * 7,
-                  strength: 0.21 - i * 0.03
+                  strength: 0.21 - i * 0.03,
+                  lastInteractionAt: `2026-09-${String(17 - i * 2).padStart(2, "0")}T12:00:00Z`
                 }))
             : [],
           generatedAt: "2026-09-17T12:00:00Z",
-          timeWindow: "2020–2026 · sample data",
+          timeWindow: "Last 30 days · sample data",
+          days: 30,
           truncated: false
         }
       }

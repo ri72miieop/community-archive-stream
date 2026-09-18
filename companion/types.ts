@@ -62,16 +62,56 @@ export function isReadingPage(url: string): boolean {
     new URL(url).pathname
   )
 }
+// Prefer repeated, distinctive topic words. Conversational filler is not a topic.
 const STOP = new Set(
-  "about after again also another because been before being best better both could does doing dont even every from going good have here into just know like make more most much only other over really same should some something than that their them then there these they thing think this those through very want were what when where which while will with would your youre https http twitter".split(
+  "a an the i im ive ill id me my do dm we us our you youre your they them their he she it its is are was were be been being to of on in at as and or but if for from with without about after again also another because before both could does doing dont even every going good got have here how into just know like let lets make makes more most much only other over really same should some something than that then there these thing think this those through very want what when where which while will would https http today tomorrow yesterday reply thank thanks using use large component talk new need needs almost everyone actually reasonable noticed result hope questions question way one two paper stuff look looking said says say still getting people".split(
     " "
   )
+)
+const GENERAL = new Set(
+  "work life time day world things many interesting best better".split(" ")
 )
 export function keywords(text: string): string[] {
   const words =
     text
       .toLowerCase()
-      .replace(/https?:\/\/\S+|@[\w]+/g, "")
-      .match(/[\p{L}]{4,}/gu) || []
-  return [...new Set(words.filter((word) => !STOP.has(word)))].slice(0, 3)
+      .replace(/https?:\/\/\S+|@[\w]+/g, " ")
+      .replace(/[’']/g, "")
+      .match(/[\p{L}][\p{L}\p{N}]{1,}/gu) || []
+  const counts = new Map<string, { count: number; index: number }>()
+  words.forEach((word, index) => {
+    if (STOP.has(word)) return
+    const entry = counts.get(word)
+    counts.set(word, {
+      count: (entry?.count || 0) + 1,
+      index: entry?.index ?? index
+    })
+  })
+  return [...counts]
+    .sort(([a, x], [b, y]) => {
+      const score = (word: string, n: number) =>
+        Math.min(n, 4) * 3 + (GENERAL.has(word) ? -4 : 0)
+      return score(b, y.count) - score(a, x.count) || x.index - y.index
+    })
+    .slice(0, 4)
+    .map(([word]) => word)
+}
+export function contextQuery(text: string): string {
+  // Authors often name a precise topic in quotes (e.g. 'pacing'). Preserve
+  // that phrase instead of pairing it with incidental prose like 'worry'.
+  for (const match of text.matchAll(
+    /(?:^|\s)["'“‘]([^"'”’\n]{3,60})["'”’](?=$|[\s:.,;!?])/g
+  )) {
+    const phrase = match[1].toLowerCase().trim()
+    const terms = keywords(phrase)
+    if (
+      phrase.split(/\s+/).length <= 4 &&
+      terms.some((term) => !GENERAL.has(term))
+    )
+      return phrase
+  }
+  const terms = keywords(text)
+  // Two anchors retain more of the subject than a broad one-word association.
+  if (terms.length === 1 && GENERAL.has(terms[0])) return ""
+  return terms.slice(0, 2).join(" ")
 }

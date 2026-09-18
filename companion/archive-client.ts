@@ -66,6 +66,18 @@ const payloads = {
     )
   }),
   trends: z.object({
+    words: z
+      .array(
+        z.object({
+          term: z.string().min(1),
+          lane: z.enum(["emerging", "rising", "falling"]).optional(),
+          posts: z.number().finite().nonnegative(),
+          changePct: z.number().finite().nullable(),
+          since: z.string().optional(),
+          until: z.string().optional()
+        })
+      )
+      .optional(),
     term: z.string(),
     granularity: z.string(),
     buckets: z.array(z.string()),
@@ -79,11 +91,13 @@ const payloads = {
     neighbors: z.array(
       person.extend({
         strength: z.number().finite(),
-        interactions: z.number().finite()
+        interactions: z.number().finite(),
+        lastInteractionAt: z.string().optional()
       })
     ),
     generatedAt: z.string(),
     timeWindow: z.string(),
+    days: z.number().int().positive().optional(),
     truncated: z.boolean()
   })
 }

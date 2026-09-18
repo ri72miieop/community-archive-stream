@@ -1,7 +1,8 @@
+import { cancelLogin, finishLogin } from "~companion/auth-service"
+import { flush } from "~companion/service"
 import { supabase } from "~core/supabase"
 
 import { cleanupOldRecords } from "../utils/IndexDB"
-import { flush } from "~companion/service"
 
 // Run database cleanup on extension startup
 async function runDatabaseCleanup() {
@@ -36,13 +37,15 @@ chrome.action.onClicked.addListener(() => {
 
 // MV3 workers sleep; alarms survive where setInterval would not.
 chrome.alarms.create("private-reading-sync", { periodInMinutes: 1 })
-chrome.alarms.onAlarm.addListener(alarm => {
+chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === "private-reading-sync") void flush()
 })
-chrome.tabs.onRemoved.addListener(tabId => {
+chrome.tabs.onRemoved.addListener((tabId) => {
+  void cancelLogin(tabId)
   void chrome.storage.session.remove(`reading-context:${tabId}`)
 })
 chrome.tabs.onUpdated.addListener((tabId, info) => {
+  if (info.url) void finishLogin(tabId, info.url)
   if (info.url) void chrome.storage.session.remove(`reading-context:${tabId}`)
 })
 

@@ -70,6 +70,7 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
             offset: z.number().optional(),
             period: z.string().optional(),
             granularity: z.string().optional(),
+            graphWindow: z.string().optional(),
             date: z.string().optional()
           })
           .parse(req.body.input)
@@ -104,7 +105,10 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
         data = await summary()
         break
       case "context":
-        data = await context(tweetSchema.parse(req.body.tweet))
+        data = await context(
+          tweetSchema.parse(req.body.tweet),
+          z.string().trim().max(120).optional().parse(req.body.query)
+        )
         break
       case "export":
         data = await exportHistory(z.string().uuid().parse(req.body.accountId))

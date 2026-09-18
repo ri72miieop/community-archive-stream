@@ -7,6 +7,7 @@ import { supabase } from "~core/supabase"
 
 import { parseContextArchive } from "./context-archive"
 import {
+  contextQuery,
   keywords,
   type ContextResult,
   type Memory,
@@ -333,9 +334,12 @@ async function archiveSearch(query: string): Promise<ReadingTweet[]> {
   return tweets
 }
 
-export async function context(tweet: ReadingTweet): Promise<ContextResult> {
+export async function context(
+  tweet: ReadingTweet,
+  override?: string
+): Promise<ContextResult> {
   const terms = keywords(tweet.text)
-  const query = terms.slice(0, 1).join(" ")
+  const query = override?.trim() || contextQuery(tweet.text)
   const [archive, related, author] = await Promise.allSettled([
     archiveSearch(query),
     terms.length ? memory(terms.join(" OR "), "", 5) : Promise.resolve([]),

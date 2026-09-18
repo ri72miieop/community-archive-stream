@@ -9,6 +9,7 @@ import {
   previewSummary,
   previewTweet
 } from "./fixtures"
+import { contextQuery } from "./types"
 
 import "./companion.css"
 import "./preview.css"
@@ -23,7 +24,11 @@ const api: CompanionAPI = {
       case "snapshot":
         return { ...snapshot } as T
       case "context":
-        return { ...previewContext, memories: memories.slice(0, 2) } as T
+        return {
+          ...previewContext,
+          query: body.query || contextQuery(body.tweet.text),
+          memories: memories.slice(0, 2)
+        } as T
       case "memory":
         return memories.filter((t) =>
           `${t.text} ${t.username}`

@@ -113,3 +113,26 @@ been checked: its main post supplies context when its author and permalink
 agree with the page URL. Replies without stable tweet markup are skipped.
 Before release, verify real sign-in, authenticated Trends, signed-in timelines,
 cross-device history, and pause/delete against staging.
+
+
+### Companion refinements
+
+Echoes uses paired topic words or an explicitly quoted topic, rather than the
+first word in a tweet. Its query is visible and editable; it is still literal
+text search, not semantic retrieval. Trends opens on CA's weekly word discovery
+and each word opens its historical chart. The recent graph mode shows outgoing
+replies from the last 30 days, widens to 365 days when fewer than three community
+neighbors appear, and ranks by latest reply (dates shown). The full CA graph
+remains the place for mutual replies and quotes.
+
+Account connection uses background-owned Supabase PKCE. The extension opens a
+login tab and exchanges the short-lived code when that exact tab returns to the
+CA homepage; the verifier stays in extension storage. Other tabs cannot supply
+codes, pending logins expire, and URLs/tokens are never logged. Website cookies
+are not copied. No new Chrome permissions or Supabase redirect configuration
+are required. Close a login tab to cancel; use **Connect CA account** to retry.
+
+Release the gateway `recent-neighbors` endpoint, then the CA companion API
+refinements, before distributing this build. Earlier website releases can still
+return the labeled all-time graph. The private-history schema remains a separate
+migration; connecting an account does not enable history or firehose capture.

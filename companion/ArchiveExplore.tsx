@@ -76,7 +76,11 @@ function seed(feature: Feature, current: ReadingTweet | null): ArchiveInput {
   const term = current ? keywords(current.text)[0] || "" : ""
   return {
     feature,
-    q: feature === "graph" || feature === "bangers" ? "" : term,
+    ...(feature === "graph" ? { graphWindow: "recent" as const } : {}),
+    q:
+      feature === "graph" || feature === "bangers" || feature === "trends"
+        ? ""
+        : term,
     username:
       feature === "search" || feature === "trends"
         ? ""
@@ -253,8 +257,9 @@ function GraphView({
   if (!data.focus)
     return (
       <p className="quiet-state">
-        This person is not present in the current graph snapshot. Try another
-        archived author.
+        {data.days
+          ? "No public community reply history is available for this person in the last year."
+          : "This person is not present in the current graph snapshot. Try another archived author."}
       </p>
     )
   const nodes = data.neighbors.slice(0, 6).map((n, i, all) => ({
@@ -264,6 +269,7 @@ function GraphView({
   }))
   return (
     <>
+      <p className="section-caption">{data.timeWindow}</p>
       <section className="graph-card">
         <svg
           viewBox="0 0 300 225"
@@ -343,8 +349,12 @@ function GraphView({
           <span>
             <strong>{n.name}</strong>
             <small>
-              @{n.username} · {count(n.interactions)} mutual interactions
+              @{n.username} · {count(n.interactions)}{" "}
+              {data.days ? "replies" : "interactions"}
             </small>
+            {n.lastInteractionAt && (
+              <small>Latest reply · {when(n.lastInteractionAt)}</small>
+            )}
           </span>
           <ChevronRight size={14} />
         </button>
@@ -356,7 +366,7 @@ function GraphView({
       )}
       <p className="fine-print">
         Snapshot {when(data.generatedAt)} · {data.timeWindow}
-        {data.truncated ? " · Strongest retained connections shown." : ""}
+        {data.truncated ? " · More connections available." : ""}
       </p>
     </>
   )
@@ -364,9 +374,11 @@ function GraphView({
 
 function Results({
   result,
-  onPerson
+  onPerson,
+  onTerm
 }: {
   result: ArchiveResult
+  onTerm: (term: string) => void
   onPerson: (username: string) => void
 }) {
   switch (result.feature) {
@@ -386,6 +398,52 @@ function Results({
         </>
       )
     case "trends":
+      if (result.data.words)
+        return (
+          <section className="trending-words">
+            <h2>Trending words</h2>
+            <p className="section-caption">
+              This week in the archive
+              {result.data.words[0]?.since && result.data.words[0]?.until && (
+                <>
+                  {" "}
+                  · {when(result.data.words[0].since)} –{" "}
+                  {when(result.data.words[0].until)}
+                </>
+              )}
+            </p>
+            {result.data.words.map((word) => (
+              <button
+                className="graph-person"
+                key={word.term}
+                onClick={() => onTerm(word.term)}>
+                <span>
+                  <strong>{word.term}</strong>
+                  <small>
+                    {word.lane === "falling" ||
+                    (word.changePct !== null && word.changePct < 0)
+                      ? "Cooling"
+                      : word.lane === "emerging"
+                        ? "Emerging"
+                        : word.changePct === 0
+                          ? "Steady"
+                          : "Rising"}
+                    {word.changePct !== null
+                      ? ` · ${word.changePct > 0 ? "+" : ""}${Math.round(word.changePct)}%`
+                      : ""}
+                    {` · ${count(word.posts)} posts`}
+                  </small>
+                </span>
+                <ChevronRight size={14} />
+              </button>
+            ))}
+            {!result.data.words.length && (
+              <p className="quiet-state">
+                No trending words available for this week.
+              </p>
+            )}
+          </section>
+        )
       return (
         <>
           <TrendChart data={result.data} />
@@ -466,8 +524,7 @@ export default function ArchiveExplore({
     setResult(null)
     if (
       !input ||
-      ((input.feature === "search" || input.feature === "trends") &&
-        !input.q) ||
+      (input.feature === "search" && !input.q) ||
       (input.feature === "graph" && !input.username)
     ) {
       setLoading(false)
@@ -496,7 +553,11 @@ export default function ArchiveExplore({
     setDraft(value)
   }
   function person(username: string) {
-    const value: ArchiveInput = { feature: "graph", username }
+    const value: ArchiveInput = {
+      feature: "graph",
+      username,
+      graphWindow: "recent"
+    }
     setInput(value)
     setDraft(value)
   }
@@ -710,7 +771,7 @@ export default function ArchiveExplore({
                   </select>
                 </label>
               )}
-              {input.feature === "trends" && (
+              {input.feature === "trends" && input.q && (
                 <label>
                   Interval{" "}
                   <select
@@ -779,6 +840,11 @@ export default function ArchiveExplore({
           {error && (
             <div className="feature-error" role="status">
               <p>{error}</p>
+              {error.includes("Sign in") && (
+                <button className="primary" onClick={api.openSettings}>
+                  Connect CA account
+                </button>
+              )}
               <button
                 className="text-toggle"
                 onClick={() => setRevision((v) => v + 1)}>
@@ -791,7 +857,26 @@ export default function ArchiveExplore({
               Opening this part of the archive…
             </p>
           )}
-          {result && <Results result={result} onPerson={person} />}
+          {input.feature === "trends" && input.q && (
+            <button className="back" onClick={() => choose("trends")}>
+              <ArrowLeft size={13} /> Trending words
+            </button>
+          )}
+          {result && (
+            <Results
+              result={result}
+              onPerson={person}
+              onTerm={(term) => {
+                const value: ArchiveInput = {
+                  feature: "trends",
+                  q: term,
+                  granularity: "month"
+                }
+                setInput(value)
+                setDraft(value)
+              }}
+            />
+          )}
           {!result && !loading && !error && (
             <p className="quiet-state">
               Enter {input.feature === "graph" ? "a person" : "a topic"} above
