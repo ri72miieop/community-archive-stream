@@ -61,13 +61,22 @@ Context also suggests earlier author bangers and a relevant published digest sto
 
 The website's `/api/companion/v1/{feature}` adapters reuse existing CA services. A single browser-safe contract is maintained in the website, with a generated, checksum-checked extension copy. Installed extensions validate response shapes, deduplicate requests, bound their cache, and cool down after rate limits or upstream errors. Public requests carry a topic/handle; only authenticated trends carries a session token. Private reading history never enters this API.
 
-The API must be released before the extension; 404 responses explicitly say it is awaiting release. The implementation and local fixture preview are ready for review. Actual staging OAuth and live service response checks remain release gates. The scope of this turn does not include deployment.
+The API was deployed to production on September 17, 2026 via [website PR #991](https://github.com/TheExGenesis/community-archive/pull/991), commit `a69e0161b579d02e2e6af23672480f4e6606335a`. Actual staging OAuth and authenticated Trends checks remain release gates for the extension.
 
 The extension repository includes an additive migration and disposable PostgreSQL tests. Promote the reviewed migration into the main `community-archive` repository's canonical migration/schema workflow before release; it targets the existing CA Supabase project, not a separate service. The extension's `supabase/` directory is not a complete standalone project.
 
 Creating a migration PR in the main CA repository currently triggers a shared staging reset. This change therefore does not silently create that PR or apply the migration. No production database, firehose policy, public export, ClickHouse projection, or store listing was changed. The new private tables must stay out of public exports and analytical ingestion.
 
-The existing extension OAuth setup and deployment credentials remain prerequisites. The local browser build used placeholder credentials and a local fixture server. A configured staging build still needs sign-in, cross-device sync, pause/delete, and real X DOM confirmation before release.
+The initial fixture browser build used placeholder credentials and a local server. A subsequent unpacked build uses the production public Supabase configuration, with private collection and contribution off. A configured staging build still needs sign-in, authenticated Trends, cross-device sync, pause/delete, and signed-in X timeline checks before release. The unpacked extension ID must be allowed by the existing OAuth redirect configuration; the browser demo does not establish that compatibility.
+
+### Production API rollout and live browser check
+
+- Production deployment: `dpl_Acd7LXGE3gfBj9HKeGLKQLdgSQRR`, READY with `www.community-archive.org` assigned; build duration about 90 seconds.
+- Previous production deployment remains the rollback target: `dpl_FsizH6DJVSxNiQTMNxgQevNYq7Bj` (`community-archive-3jxw5yd5c-theexgenesis-projects.vercel.app`), commit `1f719c281d820eb73ee01161c44a88dd659eb312`. The API is additive and has no database migration dependency.
+- The installed extension returned six real author bangers, five published digest stories, six search results, and eight graph neighbors through its production messaging/client path. Production Trends returned JSON 401 with `private, no-store` when unauthenticated. No runtime errors were reported for the companion route during this check.
+- A native Chrome side panel displayed the published digest beside a real, signed-out X post. X's alternate public layout required a conservative DOM fallback: only its leading article, with author/permalink agreement and its own visible text, qualifies. Eight browser regression cases cover identity, quotes, replies, visibility, private routes, and the existing signed-in markup.
+- A plain CLI request encountered Vercel's browser checkpoint; the successful live checks used the actual extension browser. No protection was disabled.
+- The hosted private-history migration is still unapplied. It adds two new tables, three indexes, owner policies and four caller-privilege RPCs; it performs no backfill or changes to existing archive tables. Collection defaults off. Cloud records remain until deletion and are not end-to-end encrypted.
 
 ## Validation
 

@@ -76,8 +76,11 @@ search endpoint and degrade gracefully when unavailable or rate limited.
 
 Explore uses `/api/companion/v1/{bangers,digest,trends,search,graph}` on CA. The
 website adapter reuses existing ranking, published editions, trend evidence,
-graph snapshots, and archive search. Release that API before this extension;
-an unreleased endpoint is shown as unavailable rather than sample content.
+graph snapshots, and archive search. The API was deployed to production on
+September 17, 2026 ([website PR #991](https://github.com/TheExGenesis/community-archive/pull/991)).
+The unpacked extension has fetched real Bangers, Digest, Search, and Graph data;
+Trends correctly requires sign-in. The Chrome Web Store release and private
+history migration remain separate steps.
 Trends sends the reader's Supabase access token for server validation. Public
 feature reads send no token, viewing durations, or private-history records.
 
@@ -97,5 +100,8 @@ and 429/5xx cooldown. Media and quote payloads are preserved in result cards.
 Live stream, conversation maps/strands, opportunities, profiles, apps, and
 account/archive settings have website entry points in the Explore menu.
 
-The preview's data is fictional. Before release, verify real sign-in, all five
-API shapes, rate limits, and real X context with a configured staging build.
+The preview's data is fictional. The real X signed-out status layout has also
+been checked: its main post supplies context when its author and permalink
+agree with the page URL. Replies without stable tweet markup are skipped.
+Before release, verify real sign-in, authenticated Trends, signed-in timelines,
+cross-device history, and pause/delete against staging.
