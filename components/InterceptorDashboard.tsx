@@ -9,7 +9,7 @@ import posthog from "~core/posthog"
 import { getUser } from "~utils/dbUtils"
 import { downloadDataAsJson, downloadDataByOriginator, downloadAsZip } from "~utils/zipUtils"
 import "~/prod.css"
-import { TwitterDataMapper } from "~InterceptorModules/utils/TwitterDataMapper"
+import { getInterceptedRecordPreview } from "~components/interceptedRecordPreview"
 import { supabase } from "~core/supabase"
 
 // --- Import charting library at the top of your file:
@@ -777,12 +777,9 @@ const InterceptorDashboard = () => {
   }
 
   const renderDataCard = (item: TimedObjectWithCanSendToCA) => {
-    const isProcessing = item.reason && processingReasons.has(item.reason)
-    const mappedData = item.type.includes("notification") ? item.data : TwitterDataMapper.mapAll(item.data)
-    const tweet = item.type.includes("notification") ? item.data : mappedData[0].tweet;
-    const account = item.type.includes("notification") ? item.originator_id : mappedData[0].account;
-
-    const tweetText = item.type.includes("notification") ? item.data : mappedData[0].tweet.full_text;
+    const { text: tweetText, username } = getInterceptedRecordPreview(item.data)
+    const tweetId = String(item.originator_id ?? "")
+    const isTweetId = /^\d+$/.test(tweetId)
     
     return (
       <div
@@ -800,16 +797,19 @@ const InterceptorDashboard = () => {
         </div>
         <div className="space-y-1">
           <p className="text-sm">
-            <span className="font-medium">Tweet ID:</span> <a href={`https://twitter.com/${account?.username || "u"}/status/${item.originator_id}`} target="_blank" rel="noopener noreferrer">{item.originator_id}</a>
+            <span className="font-medium">{isTweetId ? "Tweet ID:" : "Record ID:"}</span>{" "}
+            {isTweetId ? (
+              <a href={`https://twitter.com/${username || "u"}/status/${tweetId}`} target="_blank" rel="noopener noreferrer">{tweetId}</a>
+            ) : tweetId}
           </p>
-          {tweet && (
+          {tweetText && (
             <p className="text-sm">
               <span className="font-medium">Tweet:</span> {tweetText.length > 80 ? `${tweetText.substring(0, 80)}...` : tweetText}
             </p>
           )}
           <p className="text-sm">
             <span className="font-medium">User:</span>{" "}
-            {account?.username|| "Not available"}
+            {username || "Not available"}
           </p>
           {item.canSendToCA !== undefined && (
             <p className="text-sm">
